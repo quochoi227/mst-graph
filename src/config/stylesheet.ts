@@ -21,7 +21,7 @@ export const cytoscapeStylesheet = [
       label: "data(label)",
       color: "#94a3b8",
       fontSize: "16px",
-      width: 1.5,
+      width: 2,
       curveStyle: "bezier",
       lineColor: "#cbd5e1",
       targetArrowColor: "#cbd5e1",
@@ -69,5 +69,16 @@ export const cytoscapeStylesheet = [
       transitionProperty: "background-color, line-color, target-arrow-color",
       transitionDuration: "0.5s",
     },
+  },
+
+  // Candidate edge
+  {
+    selector: ".candidate-edge",
+    style: {
+      lineColor: "#fbbf24",
+      targetArrowColor: "#fbbf24",
+      width: 3,
+      lineStyle: "dashed",
+    }
   }
 ];

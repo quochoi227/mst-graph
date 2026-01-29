@@ -30,13 +30,10 @@ export function AppSidebar() {
 
   const handlePlay = () => {
     const { cy, sourceNode } = useGraphStore.getState();
-    if (cy && sourceNode) {
-      if (algorithm === "prim") {
-        primMST(cy, sourceNode.id(), 800);
-      } else if (algorithm === "kruskal") {
-        // Thuật toán Kruskal cho đồ thị vô hướng
-        kruskalMST(cy, 800);
-      }
+    if (cy && sourceNode && algorithm === "prim") {
+      primMST(cy, sourceNode.id(), 800);
+    } else if (cy && algorithm === "kruskal") {
+      kruskalMST(cy, 800);
     }
   };
 
@@ -58,7 +55,7 @@ export function AppSidebar() {
   }
 
   return (
-    <div className="p-4 w-80 border-r border-border">
+    <div className="p-4 w-70 border-r border-border">
       <div className="mb-4">
         <p className="uppercase text-sm font-semibold text-muted-foreground mb-2">
           Thuật Toán
@@ -92,33 +89,22 @@ export function AppSidebar() {
           Mô Phỏng
         </p>
         <div className="mb-4">
-          <div className="flex gap-2">
+          <div className="flex gap-2 justify-evenly">
             <button
-              className="flex-1 cursor-pointer flex justify-center items-center bg-primary px-5 py-2 text-white rounded-xs"
+              className="cursor-pointer flex justify-center items-center bg-primary px-5 py-2 text-white rounded-xs"
               onClick={handlePlay}
             >
               <Play />
             </button>
             <button
-              className="flex-1 cursor-pointer flex justify-center items-center bg-primary px-5 py-2 text-white rounded-xs"
-              onClick={handleClick}
-            >
-              <Pause />
-            </button>
-            <button
-              className="flex-1 cursor-pointer flex justify-center items-center bg-primary px-5 py-2 text-white rounded-xs"
-            >
-              <SkipForward />
-            </button>
-            <button
-              className="flex-1 cursor-pointer flex justify-center items-center bg-primary px-5 py-2 text-white rounded-xs"
+              className="cursor-pointer flex justify-center items-center bg-primary px-5 py-2 text-white rounded-xs"
               onClick={handleReset}
             >
               <RotateCcw />
             </button>
           </div>
         </div>
-        <div>
+        {/* <div>
           <div className="flex justify-between mb-2">
             <span className="font-semibold">Tốc độ</span>
             <span>1.5x</span>
@@ -128,7 +114,7 @@ export function AppSidebar() {
             <span>Slow</span>
             <span>Fast</span>
           </div>
-        </div>
+        </div> */}
       </div>
       <hr />
       <div className="mb-4 mt-2">

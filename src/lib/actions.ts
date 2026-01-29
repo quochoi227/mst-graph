@@ -1,4 +1,5 @@
 import cytoscape from "cytoscape";
+import { useGraphStore } from "../store/useGraphStore";
 
 export const bfsTraversal = (cy: cytoscape.Core | null, sourceNode: string) => {
   if (!cy) return;
@@ -77,25 +78,18 @@ export const printGraphData = (cy: cytoscape.Core | null) => {
 export const reset = (cy: cytoscape.Core | null) => {
   if (!cy) return;
   cy.elements().removeClass(
-    "highlighted edmonds-cycle edmonds-merged edmonds-hidden edmonds-selected-edge edmonds-candidate-edge edmonds-final"
+    "highlighted edmonds-cycle edmonds-merged edmonds-hidden edmonds-selected-edge candidate-edge edmonds-final"
   );
   cy.$(":selected").unselect();
 };
 
-// ====================== Thuật toán Prim cho đồ thị vô hướng (bonus) ======================
-
-/**
- * Thuật toán Prim - Tìm MST cho đồ thị vô hướng
- * @param cy - Cytoscape core instance  
- * @param sourceNode - Node bắt đầu
- * @param delayMs - Thời gian delay giữa các bước (ms)
- */
 export const primMST = async (
   cy: cytoscape.Core | null,
   sourceNode: string,
   delayMs: number = 1000
 ): Promise<void> => {
   if (!cy) return;
+  const { addLogEntry } = useGraphStore.getState();
 
   reset(cy);
 
@@ -107,55 +101,61 @@ export const primMST = async (
   visited.add(sourceNode);
   cy.$id(sourceNode).addClass("highlighted");
   
-  console.log("🚀 Bắt đầu thuật toán Prim");
-  console.log(`📍 Node khởi đầu: ${sourceNode}`);
+  addLogEntry("🚀 Bắt đầu thuật toán Prim");
+  addLogEntry(`📍 Node khởi đầu: ${sourceNode}`);
   await delay(delayMs);
 
   while (visited.size < nodes.length) {
     let minEdge: cytoscape.EdgeSingular | null = null;
     let minWeight = Infinity;
 
+    addLogEntry('So sánh các cạnh sau:')
     // Tìm cạnh có trọng số nhỏ nhất nối từ visited sang unvisited
     for (const nodeId of visited) {
       const node = cy.$id(nodeId);
       const connectedEdges = node.connectedEdges();
 
-      connectedEdges.forEach((edge) => {
-        const source = edge.source().id();
-        const target = edge.target().id();
+      for (let i = 0; i < connectedEdges.length; i++) {
+        const source = connectedEdges[i].source().id();
+        const target = connectedEdges[i].target().id();
         const otherNode = source === nodeId ? target : source;
 
+        
         if (!visited.has(otherNode)) {
-          edge.addClass("edmonds-candidate-edge");
-          const weight = edge.data("weight") || 1;
+          addLogEntry(`  - Cạnh: ${source} - ${target} (weight: ${connectedEdges[i].data("weight") || 1})`);
+          connectedEdges[i].addClass("candidate-edge");
+          await delay(delayMs / 2);
+          const weight = connectedEdges[i].data("weight") || 1;
           if (weight < minWeight) {
             minWeight = weight;
-            minEdge = edge;
+            minEdge = connectedEdges[i];
           }
         }
-      });
+      }
     }
 
     await delay(delayMs / 2);
 
     // Xóa highlight candidate
-    cy.edges(".edmonds-candidate-edge").removeClass("edmonds-candidate-edge");
+    cy.edges(".candidate-edge").removeClass("candidate-edge");
 
     if (minEdge) {
-      const source = minEdge.source().id();
-      const target = minEdge.target().id();
+      const selectedEdge = minEdge as cytoscape.EdgeSingular;
+      const source = selectedEdge.source().id();
+      const target = selectedEdge.target().id();
       const newNode = visited.has(source) ? target : source;
 
       visited.add(newNode);
       mstEdges.push(minEdge);
 
-      minEdge.addClass("highlighted");
+      addLogEntry(`🔍 Chọn cạnh nhỏ nhất: ${source} - ${target} (weight: ${minWeight})`);
+      selectedEdge.addClass("highlighted");
       cy.$id(newNode).addClass("highlighted");
 
-      console.log(`  ✓ Thêm cạnh: ${source} - ${target} (weight: ${minWeight})`);
+      addLogEntry(`  ✓ Thêm cạnh: ${source} - ${target} (weight: ${minWeight})`);
       await delay(delayMs);
     } else {
-      console.log("⚠️ Đồ thị không liên thông - không thể tìm MST hoàn chỉnh");
+      addLogEntry("⚠️ Đồ thị không liên thông - không thể tìm MST hoàn chỉnh");
       break;
     }
   }
@@ -168,7 +168,7 @@ export const primMST = async (
   // });
 
   const totalWeight = mstEdges.reduce((sum, e) => sum + (e.data("weight") || 1), 0);
-  console.log(`\n✅ Hoàn thành! Tổng trọng số MST: ${totalWeight}`);
+  addLogEntry(`\n✅ Hoàn thành! Tổng trọng số MST: ${totalWeight}`);
 };
 
 // ====================== Thuật toán Kruskal cho đồ thị vô hướng (bonus) ======================
@@ -182,6 +182,7 @@ export const kruskalMST = async (
   cy: cytoscape.Core | null,
   delayMs: number = 1000
 ): Promise<void> => {
+  const { addLogEntry } = useGraphStore.getState();
   if (!cy) return;
 
   reset(cy);
@@ -228,14 +229,14 @@ export const kruskalMST = async (
     return (a.data("weight") || 1) - (b.data("weight") || 1);
   });
 
-  console.log("🚀 Bắt đầu thuật toán Kruskal");
-  console.log(`📊 Số cạnh: ${edges.length}`);
+  addLogEntry("🚀 Bắt đầu thuật toán Kruskal");
+  addLogEntry(`📊 Số cạnh: ${edges.length}`);
 
   const mstEdges: cytoscape.EdgeSingular[] = [];
   let totalWeight = 0;
 
   for (const edge of edges) {
-    edge.addClass("edmonds-candidate-edge");
+    edge.addClass("candidate-edge");
     await delay(delayMs / 2);
 
     const source = edge.source().id();
@@ -246,25 +247,25 @@ export const kruskalMST = async (
       mstEdges.push(edge);
       totalWeight += weight;
 
-      edge.removeClass("edmonds-candidate-edge");
+      edge.removeClass("candidate-edge");
       edge.addClass("highlighted");
       edge.source().addClass("highlighted");
       edge.target().addClass("highlighted");
 
-      console.log(`  ✓ Thêm cạnh: ${source} - ${target} (weight: ${weight})`);
+      addLogEntry(`  ✓ Thêm cạnh: ${source} - ${target} (weight: ${weight})`);
       await delay(delayMs);
 
       if (mstEdges.length === cy.nodes().length - 1) {
         break;
       }
     } else {
-      edge.removeClass("edmonds-candidate-edge");
-      console.log(`  ✗ Bỏ qua cạnh: ${source} - ${target} (tạo chu trình)`);
+      edge.removeClass("candidate-edge");
+      addLogEntry(`  ✗ Bỏ qua cạnh: ${source} - ${target} (tạo chu trình)`);
       await delay(delayMs / 3);
     }
   }
 
-  console.log(`\n✅ Hoàn thành! Tổng trọng số MST: ${totalWeight}`);
+  addLogEntry(`\n✅ Hoàn thành! Tổng trọng số MST: ${totalWeight}`);
 };
 
 // ======================= Utility Functions ======================

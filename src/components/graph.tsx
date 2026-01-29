@@ -220,8 +220,8 @@ export default function Graph() {
 
   return (
     <div className="h-screen flex flex-1">
-      <div className="w-238 h-full relative">
-        <div className="relative w-full h-full bg-white bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] bg-size-[20px_20px]">
+      <div className="w-238 max-h-screen flex flex-col">
+        <div className="relative w-full h-full bg-white">
           <CytoscapeComponent
             elements={elements}
             cy={onCyInit}

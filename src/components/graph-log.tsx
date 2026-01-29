@@ -1,17 +1,21 @@
-import { SquareTerminal, X } from "lucide-react"
+import { SquareTerminal } from "lucide-react"
 import { useGraphStore } from "../store/useGraphStore"
+import { useEffect, useRef } from "react"
 
 
 function GraphLog() {
-  const { log, addLogEntry } = useGraphStore()
+  const { log } = useGraphStore()
+  const logRef = useRef<HTMLDivElement>(null)
 
-  const handleAddLog = () => {
-    const timestamp = new Date().toLocaleTimeString()
-    addLogEntry(`[${timestamp}] New log entry added.`)
-  }
+  useEffect(() => {
+    logRef.current?.scrollTo({
+      top: logRef.current.scrollHeight,
+      behavior: "smooth",
+    })
+  }, [log.length])
 
   return (
-    <div className="absolute bottom-4 left-4 right-4 z-10 pointer-events-none">
+    <div className="pointer-events-none">
       <div className="bg-white/95 backdrop-blur-sm border border-slate-200 rounded-xl shadow-xl shadow-slate-200/50 overflow-hidden max-w-2xl mx-auto pointer-events-auto">
         <div className="flex items-center justify-between px-4 py-2 bg-slate-50 border-b border-slate-200">
           <div className="flex items-center gap-2">
@@ -20,11 +24,8 @@ function GraphLog() {
               Execution Log
             </span>
           </div>
-          <button className="text-slate-400 hover:text-red-500 transition-colors">
-            <X onClick={handleAddLog} />
-          </button>
         </div>
-        <div className="p-3 h-32 overflow-y-auto font-mono text-xs space-y-1.5">
+        <div ref={logRef} className="p-3 h-48 overflow-y-auto font-mono text-xs space-y-1.5">
           {log.map((entry, index) => (
             <div key={index} className="text-slate-700">
               {entry}
