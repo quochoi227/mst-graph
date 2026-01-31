@@ -171,13 +171,6 @@ export const primMST = async (
   addLogEntry(`\n✅ Hoàn thành! Tổng trọng số MST: ${totalWeight}`);
 };
 
-// ====================== Thuật toán Kruskal cho đồ thị vô hướng (bonus) ======================
-
-/**
- * Thuật toán Kruskal - Tìm MST cho đồ thị vô hướng
- * @param cy - Cytoscape core instance
- * @param delayMs - Thời gian delay giữa các bước (ms)
- */
 export const kruskalMST = async (
   cy: cytoscape.Core | null,
   delayMs: number = 1000

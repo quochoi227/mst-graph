@@ -55,27 +55,36 @@ export function AppSidebar() {
   }
 
   return (
-    <div className="p-4 w-70 border-r border-border">
+    <div className="p-4 w-72 bg-white border-r border-slate-200 flex flex-col overflow-hidden">
+      {/* Algorithm Selection */}
       <div className="mb-4">
-        <p className="uppercase text-sm font-semibold text-muted-foreground mb-2">
-          Thuật Toán
+        <p className="uppercase text-xs font-bold text-slate-500 mb-2 tracking-wider">
+          🔬 Thuật Toán
         </p>
         <div className="flex flex-col gap-2">
           {items.map((item) => (
             <div
               key={item.title}
               className={cn(
-                "cursor-pointer flex items-center gap-3 p-1.5 rounded border border-border-dark bg-surface-dark hover:border-primary/50 transition-all text-text",
+                "cursor-pointer flex items-center gap-3 p-2.5 rounded-lg border-2 transition-all duration-200",
                 algorithm === item.alg
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "text-text"
+                  ? "border-primary bg-primary/5 shadow-sm"
+                  : "border-slate-100 bg-slate-50 hover:border-slate-200 hover:bg-slate-100"
               )}
               onClick={() => setAlgorithm(item.alg)}
             >
-              <item.icon />
+              <div className={cn(
+                "p-2 rounded-lg",
+                algorithm === item.alg ? "bg-primary text-white" : "bg-white text-slate-500"
+              )}>
+                <item.icon size={18} />
+              </div>
               <div>
-                <p className="text-sm font-medium">{item.title}</p>
-                <p className="text-xs text-muted-foreground">
+                <p className={cn(
+                  "text-sm font-semibold",
+                  algorithm === item.alg ? "text-primary" : "text-slate-700"
+                )}>{item.title}</p>
+                <p className="text-xs text-slate-400">
                   {item.description}
                 </p>
               </div>
@@ -83,74 +92,69 @@ export function AppSidebar() {
           ))}
         </div>
       </div>
-      <hr />
-      <div className="mb-4 mt-2">
-        <p className="uppercase text-sm font-semibold text-muted-foreground mb-2">
-          Mô Phỏng
+
+      <hr className="border-slate-200" />
+
+      {/* Simulation Controls */}
+      <div className="my-4">
+        <p className="uppercase text-xs font-bold text-slate-500 mb-2 tracking-wider">
+          ▶️ Điều Khiển
         </p>
-        <div className="mb-4">
-          <div className="flex gap-2 justify-evenly">
-            <button
-              className="cursor-pointer flex justify-center items-center bg-primary px-5 py-2 text-white rounded-xs"
-              onClick={handlePlay}
-            >
-              <Play />
-            </button>
-            <button
-              className="cursor-pointer flex justify-center items-center bg-primary px-5 py-2 text-white rounded-xs"
-              onClick={handleReset}
-            >
-              <RotateCcw />
-            </button>
-          </div>
+        <div className="flex gap-2">
+          <button
+            className="flex-1 cursor-pointer flex justify-center items-center gap-2 bg-emerald-500 hover:bg-emerald-600 px-4 py-2.5 text-white rounded-lg transition-colors shadow-sm"
+            onClick={handlePlay}
+          >
+            <Play size={18} />
+            <span className="text-sm font-medium">Chạy</span>
+          </button>
+          <button
+            className="cursor-pointer flex justify-center items-center bg-slate-200 hover:bg-slate-300 px-4 py-2.5 text-slate-700 rounded-lg transition-colors"
+            onClick={handleReset}
+            title="Reset"
+          >
+            <RotateCcw size={18} />
+          </button>
         </div>
-        {/* <div>
-          <div className="flex justify-between mb-2">
-            <span className="font-semibold">Tốc độ</span>
-            <span>1.5x</span>
-          </div>
-          <input type="range" className="w-full" onChange={handleSpeedChange} min={0.5} max={1.5} step={0.5} defaultValue={1} />
-          <div className="flex justify-between mt-1 uppercase text-xs font-semibold text-muted-foreground">
-            <span>Slow</span>
-            <span>Fast</span>
-          </div>
-        </div> */}
       </div>
-      <hr />
-      <div className="mb-4 mt-2">
-        <p className="uppercase text-sm font-semibold text-muted-foreground mb-2">
-          Mã Giả
+
+      <hr className="border-slate-200" />
+
+      {/* Pseudocode */}
+      <div className="mt-4 flex-1 overflow-auto">
+        <p className="uppercase text-xs font-bold text-slate-500 mb-2 tracking-wider">
+          📝 Mã Giả
         </p>
-        <div className="bg-surface-dark border border-border-dark rounded p-3 text-xs font-mono text-text">
+        <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-mono text-slate-700">
           {algorithm === "prim" && (
             <div className="space-y-1">
-              <div className="text-primary font-semibold mb-2">Prim's Algorithm:</div>
-              <div>1. Chọn đỉnh bắt đầu</div>
-              <div>2. Khởi tạo MST = ∅</div>
-              <div>3. <span className="text-accent">while</span> MST chưa đủ (V-1) cạnh:</div>
-              <div className="pl-4">a. Tìm cạnh nhỏ nhất nối</div>
-              <div className="pl-7">từ MST đến đỉnh chưa thăm</div>
-              <div className="pl-4">b. Thêm cạnh vào MST</div>
-              <div className="pl-4">c. Đánh dấu đỉnh đã thăm</div>
-              <div>4. Trả về MST</div>
+              <div className="text-primary font-bold mb-2">Prim's Algorithm:</div>
+              <div className="text-slate-600">1. Chọn đỉnh bắt đầu</div>
+              <div className="text-slate-600">2. Khởi tạo MST = ∅</div>
+              <div className="text-slate-600">3. <span className="text-blue-600 font-semibold">while</span> MST chưa đủ (V-1) cạnh:</div>
+              <div className="pl-4 text-slate-600">a. Tìm cạnh nhỏ nhất nối</div>
+              <div className="pl-7 text-slate-500">từ MST đến đỉnh chưa thăm</div>
+              <div className="pl-4 text-slate-600">b. Thêm cạnh vào MST</div>
+              <div className="pl-4 text-slate-600">c. Đánh dấu đỉnh đã thăm</div>
+              <div className="text-slate-600">4. <span className="text-emerald-600 font-semibold">return</span> MST</div>
             </div>
           )}
           {algorithm === "kruskal" && (
             <div className="space-y-1">
-              <div className="text-primary font-semibold mb-2">Kruskal's Algorithm:</div>
-              <div>1. Sắp xếp các cạnh theo trọng số</div>
-              <div>2. Khởi tạo MST = ∅</div>
-              <div>3. <span className="text-accent">for each</span> cạnh e trong danh sách:</div>
-              <div className="pl-4">a. <span className="text-accent">if</span> e không tạo chu trình:</div>
-              <div className="pl-7">- Thêm e vào MST</div>
-              <div className="pl-7">- Hợp nhất hai tập đỉnh</div>
-              <div className="pl-4">b. <span className="text-accent">if</span> MST có (V-1) cạnh:</div>
-              <div className="pl-7">- <span className="text-accent">break</span></div>
-              <div>4. Trả về MST</div>
+              <div className="text-primary font-bold mb-2">Kruskal's Algorithm:</div>
+              <div className="text-slate-600">1. Sắp xếp các cạnh theo trọng số</div>
+              <div className="text-slate-600">2. Khởi tạo MST = ∅</div>
+              <div className="text-slate-600">3. <span className="text-blue-600 font-semibold">for each</span> cạnh e:</div>
+              <div className="pl-4 text-slate-600">a. <span className="text-blue-600 font-semibold">if</span> e không tạo chu trình:</div>
+              <div className="pl-7 text-slate-500">- Thêm e vào MST</div>
+              <div className="pl-7 text-slate-500">- Hợp nhất hai tập đỉnh</div>
+              <div className="pl-4 text-slate-600">b. <span className="text-blue-600 font-semibold">if</span> MST có (V-1) cạnh:</div>
+              <div className="pl-7 text-slate-500">- <span className="text-orange-600 font-semibold">break</span></div>
+              <div className="text-slate-600">4. <span className="text-emerald-600 font-semibold">return</span> MST</div>
             </div>
           )}
           {!algorithm && (
-            <div className="text-muted-foreground text-center py-4">
+            <div className="text-slate-400 text-center py-4">
               Chọn thuật toán để xem mã giả
             </div>
           )}

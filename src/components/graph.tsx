@@ -2,9 +2,9 @@ import CytoscapeComponent from "react-cytoscapejs";
 import cytoscape from "cytoscape";
 import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { cytoscapeStylesheet } from "../config/stylesheet";
-// import { SquareTerminal, X } from "lucide-react";
 import Info from "./graph-info";
 import GraphLog from "./graph-log";
+import GraphStatsPanel from "./graph-stats";
 import { useGraphStore } from "../store/useGraphStore";
 
 export default function Graph() {
@@ -219,9 +219,10 @@ export default function Graph() {
   };
 
   return (
-    <div className="h-screen flex flex-1">
-      <div className="w-238 max-h-screen flex flex-col">
-        <div className="relative w-full h-full bg-white">
+    <div className="flex flex-1 overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0">
+        <GraphStatsPanel />
+        <div className="relative flex-1 bg-white border-b border-slate-200">
           <CytoscapeComponent
             elements={elements}
             cy={onCyInit}
@@ -256,7 +257,9 @@ export default function Graph() {
             />
           )}
         </div>
-        <GraphLog />
+        <div className="h-56">
+          <GraphLog />
+        </div>
       </div>
       <Info />
     </div>

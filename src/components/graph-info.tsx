@@ -195,96 +195,87 @@ function GraphInfo() {
   };
 
   return (
-    <div className="flex-1 p-4 border-l border-border overflow-auto">
-      {/* Bảng nhập đỉnh và cạnh */}
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
-        <div className="p-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-800">Nhập đỉnh và cạnh</h2>
-          <p className="text-sm text-gray-500 mt-1">Thêm các đỉnh và cạnh cho đồ thị</p>
-          <div className="mt-4 flex gap-3">
-            <button
-              onClick={handleSaveGraph}
-              className="button-secondary"
-            >
-              <Save size={18} />
-              Save
-            </button>
-
-            <button
-              onClick={handleLoadGraph}
-              className="button-secondary"
-            >
-              <FolderOpen size={18} />
-              Open
-            </button>
-          </div>
+    <div className="w-72 bg-slate-50 border-l border-slate-200 flex flex-col overflow-hidden">
+      {/* Header */}
+      <div className="p-3 border-b border-slate-200 bg-white">
+        <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wide">
+          📊 Dữ liệu đồ thị
+        </h2>
+        <div className="mt-2 flex gap-2">
+          <button
+            onClick={handleSaveGraph}
+            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary text-white text-xs rounded hover:bg-primary/90 transition-colors"
+          >
+            <Save size={14} />
+            Lưu
+          </button>
+          <button
+            onClick={handleLoadGraph}
+            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 bg-secondary text-white text-xs rounded hover:bg-secondary/90 transition-colors"
+          >
+            <FolderOpen size={14} />
+            Mở
+          </button>
         </div>
-        
-        <div className="p-2">
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <tbody>
-                {edges.map((edge) => (
-                  <tr key={edge.id}>
-                    <td className="p-0.5">
-                      <input
-                        type="text"
-                        value={edge.source}
-                        onChange={(e) => handleInputChange(edge.id, 'source', e.target.value)}
-                        placeholder="Đỉnh 1"
-                        className="input text-xs px-2 py-1"
-                      />
-                    </td>
-                    <td className="p-0.5">
-                      <input
-                        type="text"
-                        value={edge.target}
-                        onChange={(e) => handleInputChange(edge.id, 'target', e.target.value)}
-                        placeholder="Đỉnh 2"
-                        className="input text-xs px-2 py-1"
-                      />
-                    </td>
-                    <td className="p-0.5">
-                      <input
-                        type="text"
-                        value={edge.weight}
-                        onChange={(e) => handleInputChange(edge.id, 'weight', e.target.value)}
-                        placeholder="W"
-                        className="input text-xs px-2 py-1 w-14"
-                      />
-                    </td>
-                    <td className="p-0.5 w-8">
-                      <button
-                        onClick={() => removeEdgeRow(edge.id)}
-                        disabled={edges.length === 1}
-                        className="p-1 text-red-600 hover:bg-red-50 rounded disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                        title="Xóa hàng"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          
-          <div className="mt-4 flex gap-3">
-            <button
-              onClick={addEdgeRow}
-              className="flex cursor-pointer items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium"
-            >
-              <Plus size={18} />
-              Add
-            </button>
-            
-            <button
-              onClick={handleUpdateGraph}
-              className="button-primary"
-            >
-              Update
-            </button>
-          </div>
+      </div>
+
+      {/* Edge List */}
+      <div className="flex-1 overflow-auto p-2">
+        <div className="space-y-1">
+          {edges.map((edge) => (
+            <div key={edge.id} className="flex items-center gap-1 bg-white rounded border border-slate-200 p-1">
+              <input
+                type="text"
+                value={edge.source}
+                onChange={(e) => handleInputChange(edge.id, 'source', e.target.value)}
+                placeholder="U"
+                className="w-12 text-xs px-1.5 py-1 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-primary text-center"
+              />
+              <span className="text-slate-400 text-xs">→</span>
+              <input
+                type="text"
+                value={edge.target}
+                onChange={(e) => handleInputChange(edge.id, 'target', e.target.value)}
+                placeholder="V"
+                className="w-12 text-xs px-1.5 py-1 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-primary text-center"
+              />
+              <span className="text-slate-400 text-xs">:</span>
+              <input
+                type="text"
+                value={edge.weight}
+                onChange={(e) => handleInputChange(edge.id, 'weight', e.target.value)}
+                placeholder="W"
+                className="w-10 text-xs px-1.5 py-1 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-primary text-center"
+              />
+              <button
+                onClick={() => removeEdgeRow(edge.id)}
+                disabled={edges.length === 1}
+                className="p-1 text-red-500 hover:bg-red-50 rounded disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                title="Xóa"
+              >
+                <Trash2 size={12} />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="p-2 border-t border-slate-200 bg-white">
+        <div className="flex gap-2">
+          <button
+            onClick={addEdgeRow}
+            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded transition-colors"
+          >
+            <Plus size={14} />
+            Thêm
+          </button>
+          <button
+            onClick={handleUpdateGraph}
+            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs rounded transition-colors font-medium"
+          >
+            Cập nhật
+          </button>
         </div>
       </div>
     </div>

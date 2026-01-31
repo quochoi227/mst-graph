@@ -5,21 +5,62 @@
   --color-secondary: #00afef;
 }
 
+/* Custom scrollbar styles */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
 @layer components {
   .input {
-    /* @apply border border-gray-300 rounded-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary; */
     @apply w-full px-3 py-1.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
   }
 
   .button-primary {
-    @apply cursor-pointer items-center bg-primary text-white px-4 py-2 rounded-sm hover:bg-blue-700 flex gap-2;
+    @apply cursor-pointer items-center bg-primary text-white px-4 py-2 rounded-sm hover:bg-blue-700 flex gap-2 transition-colors;
   }
 
   .button-secondary {
-    @apply cursor-pointer items-center bg-secondary text-white px-4 py-2 rounded-sm hover:bg-blue-700 flex gap-2;
+    @apply cursor-pointer items-center bg-secondary text-white px-4 py-2 rounded-sm hover:bg-blue-400 flex gap-2 transition-colors;
   }
 
   .button-destructive {
-    @apply cursor-pointer bg-red-600 text-white px-4 py-2 rounded-sm hover:bg-red-800 flex gap-2;
+    @apply cursor-pointer bg-red-600 text-white px-4 py-2 rounded-sm hover:bg-red-800 flex gap-2 transition-colors;
+  }
+
+  /* Card styles */
+  .card {
+    @apply bg-white border border-slate-200 rounded-lg shadow-sm;
+  }
+
+  .card-header {
+    @apply p-4 border-b border-slate-200;
+  }
+
+  .card-body {
+    @apply p-4;
+  }
+
+  /* Panel styles */
+  .panel {
+    @apply bg-white border border-slate-200;
+  }
+
+  .panel-header {
+    @apply px-4 py-2 border-b border-slate-200 bg-slate-50;
   }
 }
