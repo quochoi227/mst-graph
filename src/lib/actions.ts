@@ -1,80 +1,6 @@
 import cytoscape from "cytoscape";
 import { useGraphStore } from "../store/useGraphStore";
 
-export const bfsTraversal = (cy: cytoscape.Core | null, sourceNode: string) => {
-  if (!cy) return;
-  const bfs = cy.elements().bfs({
-    roots: `#${sourceNode}`,
-    visit: () => {},
-    directed: true,
-  });
-
-  let i = 0;
-  const highlightNextEle = function () {
-    if (i < bfs.path.length) {
-      bfs.path[i].addClass("highlighted");
-
-      i++;
-      setTimeout(highlightNextEle, 1000);
-    }
-  };
-
-  // kick off first highlight
-  highlightNextEle();
-};
-
-export const dfsTraversal = (cy: cytoscape.Core | null, sourceNode: string) => {
-  if (!cy) return;
-  const dfs = cy.elements().dfs({
-    roots: `#${sourceNode}`,
-    visit: () => {},
-    directed: true,
-  });
-  let i = 0;
-  const highlightNextEle = function () {
-    if (i < dfs.path.length) {
-      dfs.path[i].addClass("highlighted");
-      i++;
-      setTimeout(highlightNextEle, 1000);
-    }
-  };
-
-  // kick off first highlight
-  highlightNextEle();
-};
-
-export const dijkstra = (cy: cytoscape.Core | null, sourceNode: string) => {
-  if (!cy) return;
-  const dijkstra = cy.elements().dijkstra({
-    root: `#${sourceNode}`,
-    weight: (edge) => {
-      return edge.data("weight") || 1; // Mặc định trọng số là 1 nếu không có
-    },
-  });
-  const targetNodeId = "c"; // Ví dụ đích là node C
-  const path = dijkstra.pathTo(cy.$id(targetNodeId));
-  const distance = dijkstra.distanceTo(cy.$id(targetNodeId));
-
-  let i = 0;
-  const highlightNextEle = function () {
-    if (i < path.length) {
-      path[i].addClass("highlighted");
-      i++;
-      setTimeout(highlightNextEle, 1000);
-    } else {
-      console.log(`Distance from A to ${targetNodeId}:`, distance);
-    }
-  };
-  // kick off first highlight
-  highlightNextEle();
-};
-
-export const printGraphData = (cy: cytoscape.Core | null) => {
-  if (!cy) return;
-  const elements = cy.elements().map((ele) => ele.data());
-  console.log("Graph elements data:", elements);
-};
-
 export const reset = (cy: cytoscape.Core | null) => {
   if (!cy) return;
   cy.elements().removeClass(
@@ -101,8 +27,8 @@ export const primMST = async (
   visited.add(sourceNode);
   cy.$id(sourceNode).addClass("highlighted");
   
-  addLogEntry("🚀 Bắt đầu thuật toán Prim");
-  addLogEntry(`📍 Node khởi đầu: ${sourceNode}`);
+  addLogEntry("Bắt đầu thuật toán Prim");
+  addLogEntry(`Node khởi đầu: ${sourceNode}`);
   await delay(delayMs);
 
   while (visited.size < nodes.length) {
@@ -148,14 +74,14 @@ export const primMST = async (
       visited.add(newNode);
       mstEdges.push(minEdge);
 
-      addLogEntry(`🔍 Chọn cạnh nhỏ nhất: ${source} - ${target} (weight: ${minWeight})`);
+      addLogEntry(`Chọn cạnh nhỏ nhất: ${source} - ${target} (weight: ${minWeight})`);
       selectedEdge.addClass("highlighted");
       cy.$id(newNode).addClass("highlighted");
 
       addLogEntry(`  ✓ Thêm cạnh: ${source} - ${target} (weight: ${minWeight})`);
       await delay(delayMs);
     } else {
-      addLogEntry("⚠️ Đồ thị không liên thông - không thể tìm MST hoàn chỉnh");
+      addLogEntry("Đồ thị không liên thông - không thể tìm MST hoàn chỉnh");
       break;
     }
   }
@@ -168,7 +94,7 @@ export const primMST = async (
   // });
 
   const totalWeight = mstEdges.reduce((sum, e) => sum + (e.data("weight") || 1), 0);
-  addLogEntry(`\n✅ Hoàn thành! Tổng trọng số MST: ${totalWeight}`);
+  addLogEntry(`\nHoàn thành! Tổng trọng số MST: ${totalWeight}`);
 };
 
 export const kruskalMST = async (
@@ -222,8 +148,8 @@ export const kruskalMST = async (
     return (a.data("weight") || 1) - (b.data("weight") || 1);
   });
 
-  addLogEntry("🚀 Bắt đầu thuật toán Kruskal");
-  addLogEntry(`📊 Số cạnh: ${edges.length}`);
+  addLogEntry("Bắt đầu thuật toán Kruskal");
+  addLogEntry(`Số cạnh: ${edges.length}`);
 
   const mstEdges: cytoscape.EdgeSingular[] = [];
   let totalWeight = 0;
@@ -258,7 +184,7 @@ export const kruskalMST = async (
     }
   }
 
-  addLogEntry(`\n✅ Hoàn thành! Tổng trọng số MST: ${totalWeight}`);
+  addLogEntry(`\nHoàn thành! Tổng trọng số MST: ${totalWeight}`);
 };
 
 // ======================= Utility Functions ======================

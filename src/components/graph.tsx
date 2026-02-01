@@ -60,8 +60,8 @@ export default function Graph() {
       if ((e.target as HTMLElement).tagName === "INPUT") return;
 
       // 2. Kiểm tra phím Delete hoặc Backspace
+      const cy = cyRef.current;
       if (e.key === "Delete" || e.key === "Backspace") {
-        const cy = cyRef.current;
         if (!cy) return;
 
         // Lấy các phần tử đang được chọn (selected)
@@ -80,6 +80,7 @@ export default function Graph() {
           selectedElements.remove();
         }
       } else if (e.key === "Escape") {
+        cy?.$(":selected").unselect();
         if (sourceNodeRef.current) {
           sourceNodeRef.current.removeClass("selected-source");
           sourceNodeRef.current = null;
@@ -114,7 +115,7 @@ export default function Graph() {
         if (!sourceNodeRef.current) {
           sourceNodeRef.current = node;
           setSourceNode(node);
-          node.addClass("selected-source");
+          // node.addClass("selected-source");
           return;
         }
 
@@ -123,7 +124,7 @@ export default function Graph() {
 
         if (source.id() === target.id()) {
           // Click lại vào chính nó để hủy nối dây
-          source.removeClass("selected-source");
+          // source.removeClass("selected-source");
           sourceNodeRef.current = null;
           setSourceNode(null);
           return;
@@ -156,8 +157,8 @@ export default function Graph() {
         });
 
         source.removeClass("selected-source");
-        sourceNodeRef.current = null;
-        setSourceNode(null);
+        sourceNodeRef.current = node;
+        setSourceNode(node);
       });
 
       // 2. Xử lý click vào VÙNG TRỐNG

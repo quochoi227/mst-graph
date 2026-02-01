@@ -2,14 +2,14 @@ import { GitGraph, Info, Github } from "lucide-react";
 
 function Header() {
   return (
-    <header className="h-14 bg-gradient-to-r from-primary to-secondary flex items-center justify-between px-6 shadow-md">
+    <header className="h-14 bg-primary flex items-center justify-between px-6 shadow-md">
       <div className="flex items-center gap-3">
         <div className="bg-white/20 p-2 rounded-lg">
           <GitGraph className="text-white" size={24} />
         </div>
         <div>
           <h1 className="text-white font-bold text-lg tracking-wide">
-            Graph Algorithm Visualizer
+            Giải thuật tìm cây khung nhỏ nhất
           </h1>
           <p className="text-white/70 text-xs">
             Trực quan hóa thuật toán đồ thị

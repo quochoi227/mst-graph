@@ -31,15 +31,15 @@
   }
 
   .button-primary {
-    @apply cursor-pointer items-center bg-primary text-white px-4 py-2 rounded-sm hover:bg-blue-700 flex gap-2 transition-colors;
+    @apply cursor-pointer items-center justify-center bg-primary text-white px-4 py-2 rounded-sm hover:bg-blue-700 flex gap-2 transition-colors;
   }
 
   .button-secondary {
-    @apply cursor-pointer items-center bg-secondary text-white px-4 py-2 rounded-sm hover:bg-blue-400 flex gap-2 transition-colors;
+    @apply cursor-pointer items-center justify-center bg-secondary text-white px-4 py-2 rounded-sm hover:bg-blue-400 flex gap-2 transition-colors;
   }
 
   .button-destructive {
-    @apply cursor-pointer bg-red-600 text-white px-4 py-2 rounded-sm hover:bg-red-800 flex gap-2 transition-colors;
+    @apply cursor-pointer bg-red-600 text-white px-4 py-2 rounded-sm hover:bg-red-800 flex items-center justify-center gap-2 transition-colors;
   }
 
   /* Card styles */

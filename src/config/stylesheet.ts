@@ -34,8 +34,8 @@ export const cytoscapeStylesheet = [
     selector: "node:selected", // Node đang được chọn
     style: {
       borderWidth: "2px",
-      color: "#94a3b8",
-      borderColor: "#e2e8f0", // Viền đậm bao quanh
+      color: "#e74c3c",
+      borderColor: "#e74c3c", // Viền đậm bao quanh
       // backgroundColor: "#2a9df4", // Đậm màu nền hơn chút
     },
   },

@@ -7,19 +7,19 @@ import {
 
 import { cn } from "../lib/utils";
 import { useGraphStore } from "../store/useGraphStore";
-import { kruskalMST, primMST, reset, printGraphData } from "../lib/actions";
+import { kruskalMST, primMST, reset } from "../lib/actions";
 
 // Menu items.
 const items = [
   {
-    title: "Prim's MST",
-    description: "MST for undirected graph",
+    title: "Giải thuật Prim",
+    description: "Giải thuật với đỉnh nguồn",
     icon: Play,
     alg: "prim",
   },
   {
-    title: "Kruskal's MST",
-    description: "MST for undirected graph",
+    title: "Giải thuật Kruskal",
+    description: "Giải thuật không với đỉnh nguồn",
     icon: Play,
     alg: "kruskal",
   }
@@ -42,12 +42,6 @@ export function AppSidebar() {
     reset(cy);
   };
 
-  const handleClick = () => {
-    const { sourceNode, cy } = useGraphStore.getState();
-    console.log("node label:", sourceNode?.data("label"));
-    printGraphData(cy);
-  };
-
   const handleSpeedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const speed = e.target.value;
     console.log("Speed changed to:", speed);
@@ -59,7 +53,7 @@ export function AppSidebar() {
       {/* Algorithm Selection */}
       <div className="mb-4">
         <p className="uppercase text-xs font-bold text-slate-500 mb-2 tracking-wider">
-          🔬 Thuật Toán
+          Thuật Toán
         </p>
         <div className="flex flex-col gap-2">
           {items.map((item) => (
@@ -98,11 +92,11 @@ export function AppSidebar() {
       {/* Simulation Controls */}
       <div className="my-4">
         <p className="uppercase text-xs font-bold text-slate-500 mb-2 tracking-wider">
-          ▶️ Điều Khiển
+          Điều Khiển
         </p>
         <div className="flex gap-2">
           <button
-            className="flex-1 cursor-pointer flex justify-center items-center gap-2 bg-emerald-500 hover:bg-emerald-600 px-4 py-2.5 text-white rounded-lg transition-colors shadow-sm"
+            className="flex-1 button-primary"
             onClick={handlePlay}
           >
             <Play size={18} />
@@ -123,7 +117,7 @@ export function AppSidebar() {
       {/* Pseudocode */}
       <div className="mt-4 flex-1 overflow-auto">
         <p className="uppercase text-xs font-bold text-slate-500 mb-2 tracking-wider">
-          📝 Mã Giả
+          Mã Giả
         </p>
         <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-mono text-slate-700">
           {algorithm === "prim" && (

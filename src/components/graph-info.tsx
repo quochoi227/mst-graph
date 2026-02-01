@@ -195,11 +195,11 @@ function GraphInfo() {
   };
 
   return (
-    <div className="w-72 bg-slate-50 border-l border-slate-200 flex flex-col overflow-hidden">
+    <div className="w-72 border-l border-slate-200 flex flex-col overflow-hidden">
       {/* Header */}
       <div className="p-3 border-b border-slate-200 bg-white">
         <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wide">
-          📊 Dữ liệu đồ thị
+          Dữ liệu đồ thị
         </h2>
         <div className="mt-2 flex gap-2">
           <button

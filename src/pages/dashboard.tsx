@@ -4,7 +4,7 @@ import Footer from "../components/footer";
 
 function Dashboard({ children }: { children: React.ReactNode }) {
   return (
-    <div className="w-full h-screen flex flex-col overflow-hidden bg-slate-100">
+    <div className="w-full h-screen flex flex-col overflow-hidden">
       <Header />
       <div className="flex flex-1 overflow-hidden">
         <AppSidebar />

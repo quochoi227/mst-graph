@@ -6,7 +6,7 @@ interface GraphStats {
   nodeCount: number;
   edgeCount: number;
   totalWeight: number;
-  isConnected: boolean;
+  componentCount: number;
 }
 
 function GraphStatsPanel() {
@@ -15,7 +15,7 @@ function GraphStatsPanel() {
     nodeCount: 0,
     edgeCount: 0,
     totalWeight: 0,
-    isConnected: false,
+    componentCount: 0,
   });
 
   useEffect(() => {
@@ -31,16 +31,14 @@ function GraphStatsPanel() {
         totalWeight += edge.data("weight") || 0;
       });
 
-      // Kiểm tra đồ thị liên thông (đơn giản)
-      const isConnected = nodes.length > 0 
-        ? cy.elements().components().length === 1 
-        : false;
+      // Đếm số thành phần liên thông
+      const componentCount = cy.elements().components().length;
 
       setStats({
         nodeCount: nodes.length,
         edgeCount: edges.length,
         totalWeight,
-        isConnected,
+        componentCount
       });
     };
 
@@ -77,11 +75,11 @@ function GraphStatsPanel() {
       bgColor: "bg-orange-50",
     },
     {
-      label: "Liên thông",
-      value: stats.isConnected ? "Có" : "Không",
+      label: "Số thành phần liên thông",
+      value: stats.componentCount,
       icon: Network,
-      color: stats.isConnected ? "text-emerald-500" : "text-red-500",
-      bgColor: stats.isConnected ? "bg-emerald-50" : "bg-red-50",
+      color: stats.componentCount === 1 ? "text-emerald-500" : "text-red-500",
+      bgColor: stats.componentCount === 1 ? "bg-emerald-50" : "bg-red-50",
     },
   ];
 
