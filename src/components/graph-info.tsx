@@ -1,5 +1,5 @@
 import { useGraphStore } from "../store/useGraphStore";
-import { Plus, Trash2, Save, FolderOpen } from "lucide-react";
+import { Plus, Trash2, Save, FolderOpen, MoveRight } from "lucide-react";
 import { useEffect, useState } from "react";
 // Import các hàm từ Tauri Plugin
 import { save, open } from "@tauri-apps/plugin-dialog";
@@ -13,7 +13,7 @@ interface EdgeInput {
 }
 
 function GraphInfo() {
-  const { cy } = useGraphStore();
+  const { cy, setSourceNode } = useGraphStore();
   const [edges, setEdges] = useState<EdgeInput[]>([
     { id: '1', source: '', target: '', weight: '' }
   ]);
@@ -59,6 +59,7 @@ function GraphInfo() {
 
   const handleUpdateGraph = () => {
     if (!cy) return;
+    setSourceNode(null);
 
     // Xóa tất cả các phần tử hiện tại
     cy.elements().remove();
@@ -231,7 +232,9 @@ function GraphInfo() {
                 placeholder="U"
                 className="w-12 text-xs px-1.5 py-1 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-primary text-center"
               />
-              <span className="text-slate-400 text-xs">→</span>
+              <span className="text-slate-400 text-xs">
+                <MoveRight />
+              </span>
               <input
                 type="text"
                 value={edge.target}
@@ -241,11 +244,11 @@ function GraphInfo() {
               />
               <span className="text-slate-400 text-xs">:</span>
               <input
-                type="text"
+                type="number"
                 value={edge.weight}
                 onChange={(e) => handleInputChange(edge.id, 'weight', e.target.value)}
                 placeholder="W"
-                className="w-10 text-xs px-1.5 py-1 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-primary text-center"
+                className="w-20 text-xs px-1.5 py-1 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-primary text-center"
               />
               <button
                 onClick={() => removeEdgeRow(edge.id)}

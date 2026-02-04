@@ -7,7 +7,7 @@ import {
 
 import { cn } from "../lib/utils";
 import { useGraphStore } from "../store/useGraphStore";
-import { kruskalMST, primMST, reset } from "../lib/actions";
+import { kruskalMST, primMST, reset, highlightComponents } from "../lib/actions";
 
 // Menu items.
 const items = [
@@ -30,7 +30,11 @@ export function AppSidebar() {
 
   const handlePlay = () => {
     const { cy, sourceNode } = useGraphStore.getState();
-    if (cy && sourceNode && algorithm === "prim") {
+    if (cy && algorithm === "prim") {
+      if (!sourceNode) {
+        alert("Vui lòng chọn đỉnh nguồn trong đồ thị trước khi chạy Prim.");
+        return;
+      }
       primMST(cy, sourceNode.id(), 800);
     } else if (cy && algorithm === "kruskal") {
       kruskalMST(cy, 800);
@@ -153,6 +157,27 @@ export function AppSidebar() {
             </div>
           )}
         </div>
+      </div>
+
+      <hr className="border-slate-200 my-4" />
+
+      {/* Connected Components */}
+      <div>
+        <p className="uppercase text-xs font-bold text-slate-500 mb-2 tracking-wider">
+          Công Cụ
+        </p>
+        <button
+          className="w-full button-secondary"
+          onClick={() => {
+            const { cy } = useGraphStore.getState();
+            if (cy) {
+              highlightComponents();
+            }
+          }}
+        >
+          <Play size={18} />
+          <span>Thành Phần Liên Thông</span>
+        </button>
       </div>
     </div>
   );

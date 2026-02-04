@@ -74,17 +74,17 @@ function GraphStatsPanel() {
       color: "text-orange-500",
       bgColor: "bg-orange-50",
     },
-    {
-      label: "Số thành phần liên thông",
-      value: stats.componentCount,
-      icon: Network,
-      color: stats.componentCount === 1 ? "text-emerald-500" : "text-red-500",
-      bgColor: stats.componentCount === 1 ? "bg-emerald-50" : "bg-red-50",
-    },
+    // {
+    //   label: "Số thành phần liên thông",
+    //   value: stats.componentCount,
+    //   icon: Network,
+    //   color: stats.componentCount === 1 ? "text-emerald-500" : "text-red-500",
+    //   bgColor: stats.componentCount === 1 ? "bg-emerald-50" : "bg-red-50",
+    // },
   ];
 
   return (
-    <div className="grid grid-cols-4 gap-3 p-3 bg-slate-50 border-b border-slate-200">
+    <div className="grid grid-cols-3 gap-3 p-3 bg-slate-50 border-b border-slate-200">
       {statItems.map((item) => (
         <div
           key={item.label}
