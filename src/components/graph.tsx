@@ -11,6 +11,7 @@ export default function Graph() {
   const cyRef = useRef<cytoscape.Core>(null);
   const sourceNodeRef = useRef<cytoscape.NodeSingular | null>(null);
   const edgeRef = useRef<cytoscape.EdgeSingular | null>(null);
+  const nodeRef = useRef<cytoscape.NodeSingular | null>(null);
 
   const { setCy, setSourceNode } = useGraphStore();
 
@@ -83,6 +84,7 @@ export default function Graph() {
         cy?.$(":selected").unselect();
         if (sourceNodeRef.current) {
           sourceNodeRef.current.removeClass("selected-source");
+          setSourceNode(null);
           sourceNodeRef.current = null;
         }
       }
@@ -123,7 +125,18 @@ export default function Graph() {
         const target = node;
 
         if (source.id() === target.id()) {
-          // Click lại vào chính nó để hủy nối dây
+          // Click lại vào chính nó để thay đổi label
+          nodeRef.current = node;
+          const nodePos = node.renderedPosition();
+          setLabelInput(node.data("label") || "");
+          setPopup({
+            visible: true,
+            x: nodePos.x,
+            y: nodePos.y,
+            modelPosition: node.position(),
+            ele: "node",
+          });
+
           // source.removeClass("selected-source");
           sourceNodeRef.current = null;
           setSourceNode(null);
@@ -179,6 +192,34 @@ export default function Graph() {
         }
       });
 
+      cy.on("tap", "edge", (event) => {
+        event.originalEvent.stopPropagation();
+        
+        const edge = event.target;
+        edgeRef.current = edge;
+        
+        // Lấy tọa độ giữa của edge
+        const midRendered = edge.renderedMidpoint();
+        const midModel = edge.midpoint();
+        
+        // Hiển thị popup để edit edge
+        setLabelInput(edge.data("label") || "");
+        setPopup({
+          visible: true,
+          x: midRendered.x,
+          y: midRendered.y,
+          modelPosition: midModel,
+          ele: "edge",
+        });
+        
+        // Reset source node nếu đang trong chế độ nối dây
+        if (sourceNodeRef.current) {
+          sourceNodeRef.current.removeClass("selected-source");
+          sourceNodeRef.current = null;
+          setSourceNode(null);
+        }
+      })
+
       cy.on("pan zoom", () => {
         setPopup((prev) => (prev.visible ? { ...prev, visible: false } : prev));
       });
@@ -197,13 +238,21 @@ export default function Graph() {
       const cy = cyRef.current;
       if (!cy) return;
       if (popup.ele === "node") {
-        const id = `node-${Date.now()}`;
-        if (popup.modelPosition) {
-          cy.add({
-            group: "nodes",
-            data: { id, label: labelInput },
-            position: popup.modelPosition,
-          });
+        // Kiểm tra xem có phải đang edit node hay tạo node mới
+        if (nodeRef.current) {
+          // Edit existing node
+          nodeRef.current.data("label", labelInput);
+          nodeRef.current = null;
+        } else {
+          // Create new node
+          const id = `node-${Date.now()}`;
+          if (popup.modelPosition) {
+            cy.add({
+              group: "nodes",
+              data: { id, label: labelInput },
+              position: popup.modelPosition,
+            });
+          }
         }
       } else if (popup.ele === "edge") {
         if (edgeRef.current) {
@@ -216,6 +265,7 @@ export default function Graph() {
       setPopup({ ...popup, visible: false });
     } else if (e.key === "Escape") {
       setPopup({ ...popup, visible: false });
+      nodeRef.current = null;
     }
   };
 
@@ -254,6 +304,7 @@ export default function Graph() {
                 borderRadius: "4px",
                 border: "1px solid #333",
                 width: "100px",
+                backgroundColor: "#fff"
               }}
             />
           )}

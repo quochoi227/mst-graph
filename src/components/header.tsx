@@ -11,13 +11,13 @@ function Header() {
           <h1 className="text-white font-bold text-lg tracking-wide">
             Giải thuật tìm cây khung nhỏ nhất
           </h1>
-          <p className="text-white/70 text-xs">
+          {/* <p className="text-white/70 text-xs">
             Trực quan hóa thuật toán đồ thị
-          </p>
+          </p> */}
         </div>
       </div>
       
-      <div className="flex items-center gap-4">
+      {/* <div className="flex items-center gap-4">
         <button className="flex items-center gap-2 text-white/80 hover:text-white transition-colors text-sm">
           <Info size={18} />
           <span>Hướng dẫn</span>
@@ -26,7 +26,7 @@ function Header() {
           <Github size={18} />
           <span>GitHub</span>
         </button>
-      </div>
+      </div> */}
     </header>
   );
 }

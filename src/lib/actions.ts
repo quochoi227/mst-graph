@@ -30,14 +30,24 @@ export const reset = (cy: cytoscape.Core | null) => {
 const dfs = async (node: cytoscape.NodeSingular, color: string, visited: Set<string>, addLogEntry: (str: string) => void) => {
   addLogEntry(`  - Thăm node: ${node.data("label")}`);
   visited.add(node.id());
-  node.style("background-color", color);
+  node.animate({
+    style: { "background-color": color }
+  }, {
+    duration: 500,
+    easing: "ease-in-out"
+  });
   await delay(800);
   const neighborEdges = node.connectedEdges();
   for (let i = 0; i < neighborEdges.length; i++) {
     const edge = neighborEdges[i];
     const otherNode = edge.source().id() === node.id() ? edge.target() : edge.source();
     if (!visited.has(otherNode.id())) {
-      edge.style("line-color", color);
+      edge.animate({
+        style: { "line-color": color }
+      }, {
+        duration: 500,
+        easing: "ease-in-out"
+      });
       visited.add(otherNode.id());
       await dfs(otherNode, color, visited, addLogEntry);
     }
