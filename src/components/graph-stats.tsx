@@ -45,10 +45,10 @@ function GraphStatsPanel() {
     updateStats();
 
     // Lắng nghe sự thay đổi của đồ thị
-    cy.on("add remove", updateStats);
+    cy.on("add remove data", updateStats);
 
     return () => {
-      cy.off("add remove", updateStats);
+      cy.off("add remove data", updateStats);
     };
   }, [cy]);
 

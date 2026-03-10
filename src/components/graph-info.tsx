@@ -33,7 +33,31 @@ function GraphInfo() {
       }).filter(ele => ele !== null)
       setEdges(elements as EdgeInput[]);
     }
-  }, [cy])
+  }, [cy]);
+
+  // Nếu trên đồ thị có bất kỳ điều gì thay đổi (thêm/sửa/xóa node hoặc edge) thì cập nhật lại bảng
+  useEffect(() => {
+    if (!cy) return;
+    const updateEdgesFromGraph = () => {
+      const elements = cy.elements().map(ele => {
+        if (ele.isEdge()) {
+          return {
+            id: ele.id(),
+            source: ele.source().data('label'),
+            target: ele.target().data('label'),
+            weight: ele.data('weight')?.toString() || ''
+          };
+        }
+        return null;
+      }).filter(ele => ele !== null)
+      setEdges(elements as EdgeInput[]);
+    };
+
+    cy.on('add remove data', 'node, edge', updateEdgesFromGraph);
+    return () => {
+      cy.off('add remove data', 'node, edge', updateEdgesFromGraph);
+    };
+  }, [cy]);
 
   const addEdgeRow = () => {
     const newEdge: EdgeInput = {

@@ -2,6 +2,7 @@ import {
   Pause,
   Play,
   RotateCcw,
+  SkipBack,
   SkipForward,
 } from "lucide-react";
 
@@ -26,9 +27,11 @@ const items = [
 ];
 
 export function AppSidebar() {
-  const { algorithm, setAlgorithm } = useGraphStore();
+  const { algorithm, setAlgorithm, playing, setPlaying, setCurrentStep } = useGraphStore();
 
   const handlePlay = () => {
+    setPlaying(true);
+    
     const { cy, sourceNode } = useGraphStore.getState();
     if (cy && algorithm === "prim") {
       if (!sourceNode) {
@@ -42,15 +45,67 @@ export function AppSidebar() {
   };
 
   const handleReset = () => {
-    const { cy } = useGraphStore.getState();
+    const { cy, setCurrentStep, setSourceNode } = useGraphStore.getState();
+    setCurrentStep(0);
+    setSourceNode(null);
     reset(cy);
   };
 
-  const handleSpeedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const speed = e.target.value;
-    console.log("Speed changed to:", speed);
-    // You can implement the logic to adjust the speed of the simulation here.
+  const handleBackward = () => {
+    const { cy, sourceNode, currentStep, setCurrentStep, setPlaying, resetLog } = useGraphStore.getState();
+    if (currentStep <= 1) {
+      setCurrentStep(0);
+      reset(cy);
+      resetLog();
+      return;
+    }
+    if (cy && algorithm === "prim") {
+      if (!sourceNode) {
+        alert("Vui lòng chọn đỉnh nguồn trong đồ thị trước khi chạy Prim.");
+        return;
+      }
+      const prevStep = Math.max(0, currentStep - 1);
+      setCurrentStep(prevStep);
+      setPlaying(true);
+      primMST(cy, sourceNode.id(), 800, true);
+    } else if (cy && algorithm === "kruskal") {
+      const prevStep = Math.max(0, currentStep - 1);
+      setCurrentStep(prevStep);
+      setPlaying(true);
+      kruskalMST(cy, 800, true);
+    }
   }
+
+  const handleForward = () => {
+    const { cy, sourceNode, currentStep, setCurrentStep, setPlaying } = useGraphStore.getState();
+    // nếu bước hiện tại bằng với nodes-1 thì không forward được nữa
+    if (cy) {
+      const nodesCount = cy.nodes().length;
+      if (algorithm === "prim" && currentStep >= nodesCount - 1) return;
+      if (algorithm === "kruskal" && currentStep >= nodesCount - 1) return;
+    }
+    if (cy && algorithm === "prim") {
+      if (!sourceNode) {
+        alert("Vui lòng chọn đỉnh nguồn trong đồ thị trước khi chạy Prim.");
+        return;
+      }
+      const nextStep = currentStep + 1;
+      setCurrentStep(nextStep);
+      setPlaying(true);
+      primMST(cy, sourceNode.id(), 800, true);
+    } else if (cy && algorithm === "kruskal") {
+      const nextStep = currentStep + 1;
+      setCurrentStep(nextStep);
+      setPlaying(true);
+      kruskalMST(cy, 800, true);
+    }
+  }
+
+  // const handleSpeedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const speed = e.target.value;
+  //   console.log("Speed changed to:", speed);
+  //   // You can implement the logic to adjust the speed of the simulation here.
+  // }
 
   return (
     <div className="p-4 w-72 bg-white border-r border-slate-200 flex flex-col overflow-hidden">
@@ -99,12 +154,28 @@ export function AppSidebar() {
           Điều Khiển
         </p>
         <div className="flex gap-2">
-          <button
-            className="flex-1 button-primary"
-            onClick={handlePlay}
-          >
-            <Play size={18} />
-            <span className="text-sm font-medium">Chạy</span>
+          {playing ?(
+            <button
+              className="button-primary"
+              onClick={() => setPlaying(false)}
+            >
+              <Pause size={18} />
+              <span className="text-sm font-medium">Dừng</span>
+            </button>
+          ) : (
+            <button
+              className="button-primary"
+              onClick={handlePlay}
+            >
+              <Play size={18} />
+              <span className="text-sm font-medium">Chạy</span>
+            </button>
+          )}
+          <button disabled={playing} onClick={handleBackward} className="cursor-pointer flex justify-center items-center bg-slate-200 hover:bg-slate-300 px-4 py-2.5 text-slate-700 rounded-lg transition-colors">
+            <SkipBack size={18} />
+          </button>
+          <button disabled={playing} onClick={handleForward} className="cursor-pointer flex justify-center items-center bg-slate-200 hover:bg-slate-300 px-4 py-2.5 text-slate-700 rounded-lg transition-colors">
+            <SkipForward size={18} />
           </button>
           <button
             className="cursor-pointer flex justify-center items-center bg-slate-200 hover:bg-slate-300 px-4 py-2.5 text-slate-700 rounded-lg transition-colors"

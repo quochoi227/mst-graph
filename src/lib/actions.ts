@@ -5,9 +5,9 @@ import { getRandomColor } from "../lib/utils"
 export const reset = (cy: cytoscape.Core | null) => {
   if (!cy) return;
   cy.elements().removeClass(
-    "highlighted edmonds-cycle edmonds-merged edmonds-hidden edmonds-selected-edge candidate-edge edmonds-final"
+    "highlighted edge-highlighted candidate-edge"
   );
-  cy.$(":selected").unselect();
+  // cy.$(":selected").unselect();
   // Reset styles to default
   cy.nodes().forEach((node) => {
     node.style({
@@ -73,15 +73,22 @@ export const highlightComponents = async () => {
   addLogEntry(`Tổng số thành phần liên thông: ${components}`);
 }
 
+// Tiến hành chỉnh sửa thuật toán Prim và Kruskal như sau:
+// Mỗi lần play, backward, forward sẽ thực hiện reset thuật toán về trạng thái ban đầu và chạy lại từ đầu đến bước hiện tại.
+// Nhưng những bước trước bước hiện tại sẽ không có delay, chỉ những bước từ bước hiện tại trở đi mới có delay để minh họa quá trình thực hiện thuật toán. Điều này giúp người dùng dễ dàng theo dõi và hiểu được quá trình thực hiện thuật toán mà không bị gián đoạn bởi các bước đã qua.
+
 export const primMST = async (
   cy: cytoscape.Core | null,
   sourceNode: string,
-  delayMs: number = 1000
+  delayMs: number = 1000,
+  isPaused: boolean = false
 ): Promise<void> => {
   if (!cy) return;
-  const { addLogEntry } = useGraphStore.getState();
+  const { addLogEntry, currentStep, setCurrentStep, setPlaying, resetLog } = useGraphStore.getState();
 
+  let step = 0;
   reset(cy);
+  resetLog();
 
   const nodes = cy.nodes();
   const visited = new Set<string>();
@@ -93,9 +100,20 @@ export const primMST = async (
   
   addLogEntry("Bắt đầu thuật toán Prim");
   addLogEntry(`Node khởi đầu: ${sourceNode}`);
-  await delay(delayMs);
+
+  if (step >= currentStep) {
+    await delay(delayMs);
+  }
 
   while (visited.size < nodes.length) {
+    
+    // Kiểm tra nếu đang chơi thì chờ
+    if (useGraphStore.getState().playing === false) {
+      addLogEntry("Thuật toán bị tạm dừng.");
+      setCurrentStep(step);
+      break;
+    }
+
     let minEdge: cytoscape.EdgeSingular | null = null;
     let minWeight = Infinity;
 
@@ -114,7 +132,10 @@ export const primMST = async (
         if (!visited.has(otherNode)) {
           addLogEntry(`  - Cạnh: ${source} - ${target} (weight: ${connectedEdges[i].data("weight") || 1})`);
           connectedEdges[i].addClass("candidate-edge");
-          await delay(delayMs / 2);
+
+          if (step >= currentStep) {
+            await delay(delayMs / 2);
+          }
           const weight = connectedEdges[i].data("weight") || 1;
           if (weight < minWeight) {
             minWeight = weight;
@@ -124,7 +145,9 @@ export const primMST = async (
       }
     }
 
-    await delay(delayMs / 2);
+    if (step >= currentStep) {
+      await delay(delayMs / 2);
+    }
 
     // Xóa highlight candidate
     cy.edges(".candidate-edge").removeClass("candidate-edge");
@@ -141,34 +164,42 @@ export const primMST = async (
       addLogEntry(`Chọn cạnh nhỏ nhất: ${source} - ${target} (weight: ${minWeight})`);
       selectedEdge.addClass("highlighted");
       cy.$id(newNode).addClass("highlighted");
-
+      
       addLogEntry(`  ✓ Thêm cạnh: ${source} - ${target} (weight: ${minWeight})`);
-      await delay(delayMs);
+      step += 1;
+      if (step === currentStep && isPaused) {
+        addLogEntry(`Đang tạm dừng tại bước ${currentStep}...`);
+        setPlaying(false);
+        break;
+      }
+      if (step >= currentStep) {
+        await delay(delayMs);
+      }
     } else {
       addLogEntry("Đồ thị không liên thông - không thể tìm MST hoàn chỉnh");
       break;
     }
   }
 
-  // Xóa các edge không thuộc MST
-  // cy.edges().forEach((edge) => {
-  //   if (!mstEdges.includes(edge)) {
-  //     edge.remove()
-  //   }
-  // });
-
-  const totalWeight = mstEdges.reduce((sum, e) => sum + (e.data("weight") || 1), 0);
-  addLogEntry(`\nHoàn thành! Tổng trọng số MST: ${totalWeight}`);
+  if (visited.size === nodes.length) {
+    // setCurrentStep(0); // Reset bước đi sau khi hoàn thành
+    const totalWeight = mstEdges.reduce((sum, e) => sum + (e.data("weight") || 1), 0);
+    addLogEntry(`\nHoàn thành! Tổng trọng số MST: ${totalWeight}`);
+    setPlaying(false);
+    setCurrentStep(mstEdges.length) // Đặt bước hiện tại bằng số cạnh đã chọn để có thể forward/backward đúng
+  }
 };
 
 export const kruskalMST = async (
   cy: cytoscape.Core | null,
-  delayMs: number = 1000
+  delayMs: number = 1000,
+  isPaused: boolean = false
 ): Promise<void> => {
-  const { addLogEntry } = useGraphStore.getState();
+  const { addLogEntry, currentStep, setCurrentStep, setPlaying, resetLog } = useGraphStore.getState();
   if (!cy) return;
-
+  let step = 0;
   reset(cy);
+  resetLog();
 
   // Union-Find data structure
   const parent = new Map<string, string>();
@@ -219,8 +250,19 @@ export const kruskalMST = async (
   let totalWeight = 0;
 
   for (const edge of edges) {
+    
+    // Kiểm tra nếu đang chơi thì chờ
+    if (useGraphStore.getState().playing === false) {
+      addLogEntry("Thuật toán bị tạm dừng.");
+      setCurrentStep(step);
+      break;
+    }
+
     edge.addClass("candidate-edge");
-    await delay(delayMs / 2);
+
+    if (step >= currentStep) {
+      await delay(delayMs / 2);
+    }
 
     const source = edge.source().id();
     const target = edge.target().id();
@@ -231,24 +273,40 @@ export const kruskalMST = async (
       totalWeight += weight;
 
       edge.removeClass("candidate-edge");
-      edge.addClass("highlighted");
+      edge.addClass("edge-highlighted");
       edge.source().addClass("highlighted");
       edge.target().addClass("highlighted");
 
       addLogEntry(`  ✓ Thêm cạnh: ${source} - ${target} (weight: ${weight})`);
-      await delay(delayMs);
-
+      step += 1;
+      if (step === currentStep && isPaused) {
+        addLogEntry(`Đang tạm dừng tại bước ${currentStep}...`);
+        setPlaying(false);
+        break;
+      }
+      if (step >= currentStep) {
+        await delay(delayMs);
+      }
       if (mstEdges.length === cy.nodes().length - 1) {
         break;
       }
     } else {
       edge.removeClass("candidate-edge");
       addLogEntry(`  ✗ Bỏ qua cạnh: ${source} - ${target} (tạo chu trình)`);
-      await delay(delayMs / 3);
+      if (step >= currentStep) {
+        await delay(delayMs / 3);
+      }
     }
   }
 
-  addLogEntry(`\nHoàn thành! Tổng trọng số MST: ${totalWeight}`);
+  // Nếu đã duyệt đủ cạnh của thuật toán thì mới hiện thị tổng trọng số
+  if (mstEdges.length === cy.nodes().length - 1) {
+    addLogEntry(`\nHoàn thành! Tổng trọng số MST: ${totalWeight}`);
+    setPlaying(false);
+    // Reset visited để có thể chạy lại thuật toán mà không bị lỗi
+    // setCurrentStep(0); // Reset bước đi sau khi hoàn thành
+    setCurrentStep(mstEdges.length); // Đặt bước hiện tại bằng số cạnh đã chọn để có thể forward/backward đúng
+  }
 };
 
 // ======================= Utility Functions ======================
