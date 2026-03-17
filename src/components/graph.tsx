@@ -83,7 +83,7 @@ export default function Graph() {
       } else if (e.key === "Escape") {
         cy?.$(":selected").unselect();
         if (sourceNodeRef.current) {
-          sourceNodeRef.current.removeClass("selected-source");
+          // sourceNodeRef.current.removeClass("selected-source");
           setSourceNode(null);
           sourceNodeRef.current = null;
         }
@@ -169,7 +169,7 @@ export default function Graph() {
           ele: "edge",
         });
 
-        source.removeClass("selected-source");
+        // source.removeClass("selected-source");
         sourceNodeRef.current = node;
         setSourceNode(node);
       });
@@ -178,7 +178,7 @@ export default function Graph() {
       cy.on("tap", (event) => {
         if (event.target === cy) {
           if (sourceNodeRef.current) {
-            sourceNodeRef.current.removeClass("selected-source");
+            // sourceNodeRef.current.removeClass("selected-source");
             sourceNodeRef.current = null;
           }
           setPopup({
@@ -214,7 +214,7 @@ export default function Graph() {
         
         // Reset source node nếu đang trong chế độ nối dây
         if (sourceNodeRef.current) {
-          sourceNodeRef.current.removeClass("selected-source");
+          // sourceNodeRef.current.removeClass("selected-source");
           sourceNodeRef.current = null;
           setSourceNode(null);
         }
@@ -245,7 +245,8 @@ export default function Graph() {
           nodeRef.current = null;
         } else {
           // Create new node
-          const id = `node-${Date.now()}`;
+          // const id = `node-${Date.now()}`;
+          const id = labelInput.trim(); // Sử dụng label làm ID (cần đảm bảo không trùng lặp)
           if (popup.modelPosition) {
             cy.add({
               group: "nodes",
@@ -271,7 +272,7 @@ export default function Graph() {
 
   return (
     <div className="flex flex-1 overflow-hidden">
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="relative flex-1 flex flex-col min-w-0">
         <GraphStatsPanel />
         <div className="relative flex-1 bg-white border-b border-slate-200">
           <CytoscapeComponent
@@ -309,7 +310,7 @@ export default function Graph() {
             />
           )}
         </div>
-        <div className="h-56">
+        <div className="h-5/12">
           <GraphLog />
         </div>
       </div>

@@ -7,6 +7,8 @@ export const useGraphStore = create<GraphState>((set) => ({
   edgeInProgress: null,
   algorithm: "prim",
   log: [],
+  kruskalSteps: [],
+  primSteps: [],
   playing: false,
   // visited: new Set<string>(),
   currentStep: 0,
@@ -27,4 +29,14 @@ export const useGraphStore = create<GraphState>((set) => ({
   //   }),
   // resetVisited: () => set({ visited: new Set<string>() }),
   setCurrentStep: (step) => set({ currentStep: step }),
+  addKruskalStep: (step) =>
+    set((state) => ({
+      kruskalSteps: [...(state.kruskalSteps || []), step],
+    })),
+  addPrimStep: (step) =>
+    set((state) => ({
+      primSteps: [...(state.primSteps || []), step],
+    })),
+  resetKruskalSteps: () => set({ kruskalSteps: [] }),
+  resetPrimSteps: () => set({ primSteps: [] }),
 }));

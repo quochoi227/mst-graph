@@ -84,7 +84,7 @@ function GraphStatsPanel() {
   ];
 
   return (
-    <div className="grid grid-cols-3 gap-3 p-3 bg-slate-50 border-b border-slate-200">
+    <div className="absolute top-3 right-3 z-10 grid grid-cols-3 gap-3">
       {statItems.map((item) => (
         <div
           key={item.label}

@@ -1,6 +1,7 @@
 import cytoscape from "cytoscape";
 import { useGraphStore } from "../store/useGraphStore";
 import { getRandomColor } from "../lib/utils"
+import { PrimStep } from "../types/graph";
 
 export const reset = (cy: cytoscape.Core | null) => {
   if (!cy) return;
@@ -84,11 +85,12 @@ export const primMST = async (
   isPaused: boolean = false
 ): Promise<void> => {
   if (!cy) return;
-  const { addLogEntry, currentStep, setCurrentStep, setPlaying, resetLog } = useGraphStore.getState();
+  const { addLogEntry, currentStep, setCurrentStep, setPlaying, resetLog, addPrimStep, resetPrimSteps } = useGraphStore.getState();
 
   let step = 0;
   reset(cy);
   resetLog();
+  resetPrimSteps();
 
   const nodes = cy.nodes();
   const visited = new Set<string>();
@@ -105,7 +107,24 @@ export const primMST = async (
     await delay(delayMs);
   }
 
+  //-------------------------------
+  let selectedNode = sourceNode;
+  // Khởi tạo pi và parent cho tất cả các node
+  const pi = nodes.reduce((acc, node) => {
+    acc[node.id()] = node.id() === sourceNode ? 0 : Infinity;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const parent = nodes.reduce((acc, node) => {
+    acc[node.id()] = "∞";
+    return acc;
+  }, {} as Record<string, string | null>);
+
+  
+  //-------------------------------
+
   while (visited.size < nodes.length) {
+    const updatedNodes: Set<string> = new Set();
     
     // Kiểm tra nếu đang chơi thì chờ
     if (useGraphStore.getState().playing === false) {
@@ -137,6 +156,14 @@ export const primMST = async (
             await delay(delayMs / 2);
           }
           const weight = connectedEdges[i].data("weight") || 1;
+
+          // Cập nhật pi và parent nếu tìm thấy cạnh nhỏ hơn
+          if (weight < pi[otherNode]) {
+            pi[otherNode] = weight;
+            parent[otherNode] = nodeId;
+            updatedNodes.add(otherNode);
+          }
+
           if (weight < minWeight) {
             minWeight = weight;
             minEdge = connectedEdges[i];
@@ -161,13 +188,22 @@ export const primMST = async (
       visited.add(newNode);
       mstEdges.push(minEdge);
 
+      addPrimStep({
+        selectedNode,
+        pi: { ...pi },
+        parent: { ...parent },
+        updatedNodes: Array.from(updatedNodes),
+        action: `Chọn cạnh ${source} - ${target} (weight: ${minWeight})`
+      });
+      selectedNode = newNode;
+
       addLogEntry(`Chọn cạnh nhỏ nhất: ${source} - ${target} (weight: ${minWeight})`);
       selectedEdge.addClass("highlighted");
       cy.$id(newNode).addClass("highlighted");
       
       addLogEntry(`  ✓ Thêm cạnh: ${source} - ${target} (weight: ${minWeight})`);
       step += 1;
-      if (step === currentStep && isPaused) {
+      if (step === currentStep && isPaused && step < nodes.length - 1) {
         addLogEntry(`Đang tạm dừng tại bước ${currentStep}...`);
         setPlaying(false);
         break;
@@ -179,6 +215,8 @@ export const primMST = async (
       addLogEntry("Đồ thị không liên thông - không thể tìm MST hoàn chỉnh");
       break;
     }
+
+
   }
 
   if (visited.size === nodes.length) {
@@ -195,11 +233,14 @@ export const kruskalMST = async (
   delayMs: number = 1000,
   isPaused: boolean = false
 ): Promise<void> => {
-  const { addLogEntry, currentStep, setCurrentStep, setPlaying, resetLog } = useGraphStore.getState();
+  const { addLogEntry, currentStep, setCurrentStep, setPlaying, resetLog, addKruskalStep, resetKruskalSteps } = useGraphStore.getState();
   if (!cy) return;
   let step = 0;
   reset(cy);
   resetLog();
+  resetKruskalSteps()
+
+  const nodes = cy.nodes();
 
   // Union-Find data structure
   const parent = new Map<string, string>();
@@ -278,8 +319,9 @@ export const kruskalMST = async (
       edge.target().addClass("highlighted");
 
       addLogEntry(`  ✓ Thêm cạnh: ${source} - ${target} (weight: ${weight})`);
+      addKruskalStep({ source, target, weight, action: "add" });
       step += 1;
-      if (step === currentStep && isPaused) {
+      if (step === currentStep && isPaused && step < nodes.length - 1) {
         addLogEntry(`Đang tạm dừng tại bước ${currentStep}...`);
         setPlaying(false);
         break;
@@ -293,6 +335,7 @@ export const kruskalMST = async (
     } else {
       edge.removeClass("candidate-edge");
       addLogEntry(`  ✗ Bỏ qua cạnh: ${source} - ${target} (tạo chu trình)`);
+      addKruskalStep({ source, target, weight, action: "skip" });
       if (step >= currentStep) {
         await delay(delayMs / 3);
       }

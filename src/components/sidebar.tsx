@@ -45,18 +45,23 @@ export function AppSidebar() {
   };
 
   const handleReset = () => {
-    const { cy, setCurrentStep, setSourceNode } = useGraphStore.getState();
+    const { cy, setCurrentStep, setSourceNode, resetLog, resetKruskalSteps, resetPrimSteps } = useGraphStore.getState();
     setCurrentStep(0);
     setSourceNode(null);
+    resetLog();
+    resetKruskalSteps();
+    resetPrimSteps();
     reset(cy);
   };
 
   const handleBackward = () => {
-    const { cy, sourceNode, currentStep, setCurrentStep, setPlaying, resetLog } = useGraphStore.getState();
+    const { cy, sourceNode, currentStep, setCurrentStep, setPlaying, resetLog, resetKruskalSteps, resetPrimSteps } = useGraphStore.getState();
     if (currentStep <= 1) {
       setCurrentStep(0);
       reset(cy);
       resetLog();
+      resetKruskalSteps();
+      resetPrimSteps();
       return;
     }
     if (cy && algorithm === "prim") {
