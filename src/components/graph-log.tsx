@@ -108,10 +108,10 @@ function GraphLog() {
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-slate-300">
-                <th className="px-2 py-1">Source</th>
-                <th className="px-2 py-1">Target</th>
-                <th className="px-2 py-1">Weight</th>
-                <th className="px-2 py-1">Action</th>
+                <th className="px-2 py-1">Nguồn</th>
+                <th className="px-2 py-1">Đích</th>
+                <th className="px-2 py-1">Trọng số</th>
+                <th className="px-2 py-1">Hành động</th>
               </tr>
             </thead>
             <tbody>
@@ -123,9 +123,9 @@ function GraphLog() {
                     <td className="px-2 py-1">{step.weight}</td>
                     <td className="px-2 py-1">
                       {step.action === "add" ? (
-                        <span className="text-green-500 font-bold">Add</span>
+                        <span className="text-green-500 font-bold">Thêm</span>
                       ) : (
-                        <span className="text-red-500 font-bold">Skip</span>
+                        <span className="text-red-500 font-bold">Bỏ qua</span>
                       )}
                     </td>
                   </tr>

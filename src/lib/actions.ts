@@ -29,7 +29,7 @@ export const reset = (cy: cytoscape.Core | null) => {
 };
 
 const dfs = async (node: cytoscape.NodeSingular, color: string, visited: Set<string>, addLogEntry: (str: string) => void) => {
-  addLogEntry(`  - Thăm node: ${node.data("label")}`);
+  addLogEntry(`  - Duyệt node: ${node.data("label")}`);
   visited.add(node.id());
   node.animate({
     style: { "background-color": color }
@@ -86,6 +86,15 @@ export const primMST = async (
 ): Promise<void> => {
   if (!cy) return;
   const { addLogEntry, currentStep, setCurrentStep, setPlaying, resetLog, addPrimStep, resetPrimSteps } = useGraphStore.getState();
+
+  // Nếu đồ thị không liên thông, thì alert và dừng thuật toán
+  const components = cy.elements().components();
+  if (components.length > 1) {
+    alert("Đồ thị không liên thông - không thể tìm MST hoàn chỉnh");
+    setPlaying(false);
+    return;
+  }
+
 
   let step = 0;
   reset(cy);
@@ -201,7 +210,7 @@ export const primMST = async (
       selectedEdge.addClass("highlighted");
       cy.$id(newNode).addClass("highlighted");
       
-      addLogEntry(`  ✓ Thêm cạnh: ${source} - ${target} (weight: ${minWeight})`);
+      addLogEntry(`  - Thêm cạnh: ${source} - ${target} (weight: ${minWeight})`);
       step += 1;
       if (step === currentStep && isPaused && step < nodes.length - 1) {
         addLogEntry(`Đang tạm dừng tại bước ${currentStep}...`);
@@ -233,8 +242,18 @@ export const kruskalMST = async (
   delayMs: number = 1000,
   isPaused: boolean = false
 ): Promise<void> => {
-  const { addLogEntry, currentStep, setCurrentStep, setPlaying, resetLog, addKruskalStep, resetKruskalSteps } = useGraphStore.getState();
   if (!cy) return;
+  const { addLogEntry, currentStep, setCurrentStep, setPlaying, resetLog, addKruskalStep, resetKruskalSteps } = useGraphStore.getState();
+  
+  // Nếu đồ thị không liên thông, thì alert và dừng thuật toán
+  const components = cy.elements().components();
+  if (components.length > 1) {
+    alert("Đồ thị không liên thông - không thể tìm MST hoàn chỉnh");
+    setPlaying(false);
+    return;
+  }
+
+  
   let step = 0;
   reset(cy);
   resetLog();
@@ -318,7 +337,7 @@ export const kruskalMST = async (
       edge.source().addClass("highlighted");
       edge.target().addClass("highlighted");
 
-      addLogEntry(`  ✓ Thêm cạnh: ${source} - ${target} (weight: ${weight})`);
+      addLogEntry(`  - Thêm cạnh: ${source} - ${target} (weight: ${weight})`);
       addKruskalStep({ source, target, weight, action: "add" });
       step += 1;
       if (step === currentStep && isPaused && step < nodes.length - 1) {
@@ -334,7 +353,7 @@ export const kruskalMST = async (
       }
     } else {
       edge.removeClass("candidate-edge");
-      addLogEntry(`  ✗ Bỏ qua cạnh: ${source} - ${target} (tạo chu trình)`);
+      addLogEntry(`  - Bỏ qua cạnh: ${source} - ${target} (tạo chu trình)`);
       addKruskalStep({ source, target, weight, action: "skip" });
       if (step >= currentStep) {
         await delay(delayMs / 3);

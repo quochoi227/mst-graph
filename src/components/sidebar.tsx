@@ -36,6 +36,7 @@ export function AppSidebar() {
     if (cy && algorithm === "prim") {
       if (!sourceNode) {
         alert("Vui lòng chọn đỉnh nguồn trong đồ thị trước khi chạy Prim.");
+        setPlaying(false);
         return;
       }
       primMST(cy, sourceNode.id(), 800);
