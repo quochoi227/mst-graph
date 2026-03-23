@@ -27,7 +27,7 @@ const items = [
 ];
 
 export function AppSidebar() {
-  const { algorithm, setAlgorithm, playing, setPlaying } = useGraphStore();
+  const { algorithm, setAlgorithm, playing, setPlaying, setCurrentStep } = useGraphStore();
 
   const handlePlay = () => {
     setPlaying(true);
@@ -130,7 +130,10 @@ export function AppSidebar() {
                   ? "border-primary bg-primary/5 shadow-sm"
                   : "border-slate-100 bg-slate-50 hover:border-slate-200 hover:bg-slate-100"
               )}
-              onClick={() => setAlgorithm(item.alg)}
+              onClick={() => {
+                setAlgorithm(item.alg);
+                setCurrentStep(0);
+              }}
             >
               <div className={cn(
                 "p-2 rounded-lg",
@@ -177,13 +180,32 @@ export function AppSidebar() {
               <span className="text-sm font-medium">Chạy</span>
             </button>
           )}
-          <button disabled={playing} onClick={handleBackward} className="cursor-pointer flex justify-center items-center bg-slate-200 hover:bg-slate-300 px-4 py-2.5 text-slate-700 rounded-lg transition-colors">
+          <button
+            style={{
+              opacity: playing ? "40%" : "unset",
+              pointerEvents: playing ? "none" : "auto"
+            }}
+            disabled={playing}
+            onClick={handleBackward}
+            className="cursor-pointer flex justify-center items-center bg-slate-200 hover:bg-slate-300 px-4 py-2.5 text-slate-700 rounded-lg transition-colors">
             <SkipBack size={18} />
           </button>
-          <button disabled={playing} onClick={handleForward} className="cursor-pointer flex justify-center items-center bg-slate-200 hover:bg-slate-300 px-4 py-2.5 text-slate-700 rounded-lg transition-colors">
+          <button
+            style={{
+              opacity: playing ? "40%" : "unset",
+              pointerEvents: playing ? "none" : "auto"
+            }}
+            disabled={playing}
+            onClick={handleForward}
+            className="cursor-pointer flex justify-center items-center bg-slate-200 hover:bg-slate-300 px-4 py-2.5 text-slate-700 rounded-lg transition-colors">
             <SkipForward size={18} />
           </button>
           <button
+            style={{
+              opacity: playing ? "40%" : "unset",
+              pointerEvents: playing ? "none" : "auto"
+            }}
+            disabled={playing}
             className="cursor-pointer flex justify-center items-center bg-slate-200 hover:bg-slate-300 px-4 py-2.5 text-slate-700 rounded-lg transition-colors"
             onClick={handleReset}
             title="Reset"

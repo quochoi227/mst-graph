@@ -1,7 +1,6 @@
 import cytoscape from "cytoscape";
 import { useGraphStore } from "../store/useGraphStore";
-import { getRandomColor } from "../lib/utils"
-import { PrimStep } from "../types/graph";
+import { getRandomColor } from "../lib/utils";
 
 export const reset = (cy: cytoscape.Core | null) => {
   if (!cy) return;
