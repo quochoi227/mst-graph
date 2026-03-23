@@ -27,7 +27,7 @@ const items = [
 ];
 
 export function AppSidebar() {
-  const { algorithm, setAlgorithm, playing, setPlaying, setCurrentStep } = useGraphStore();
+  const { algorithm, setAlgorithm, playing, setPlaying } = useGraphStore();
 
   const handlePlay = () => {
     setPlaying(true);
@@ -46,9 +46,9 @@ export function AppSidebar() {
   };
 
   const handleReset = () => {
-    const { cy, setCurrentStep, setSourceNode, resetLog, resetKruskalSteps, resetPrimSteps } = useGraphStore.getState();
+    const { cy, setCurrentStep, resetLog, resetKruskalSteps, resetPrimSteps } = useGraphStore.getState();
+
     setCurrentStep(0);
-    setSourceNode(null);
     resetLog();
     resetKruskalSteps();
     resetPrimSteps();
