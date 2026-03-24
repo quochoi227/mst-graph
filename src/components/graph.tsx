@@ -30,27 +30,32 @@ export default function Graph() {
   });
   const [labelInput, setLabelInput] = useState("");
 
+  // const elements = useMemo(
+  //   () => [
+  //     { data: { id: "a", label: "A" }, position: { x: 200, y: 100 } },
+  //     { data: { id: "b", label: "B" }, position: { x: 300, y: 100 } },
+  //     { data: { id: "c", label: "C" }, position: { x: 400, y: 200 } },
+  //     { data: { id: "d", label: "D" }, position: { x: 300, y: 300 } },
+  //     { data: { id: "e", label: "E" }, position: { x: 200, y: 300 } },
+  //     { data: { id: "f", label: "F" }, position: { x: 100, y: 200 } },
+  //     { data: { id: "ab", source: "a", target: "b", label: "1", weight: 1 } },
+  //     { data: { id: "ba", source: "b", target: "a", label: "4", weight: 4 } },
+  //     { data: { id: "fa", source: "f", target: "a", label: "16", weight: 16 } },
+  //     { data: { id: "ae", source: "a", target: "e", label: "10", weight: 10 } },
+  //     { data: { id: "fe", source: "f", target: "e", label: "19", weight: 19 } },
+  //     { data: { id: "fc", source: "f", target: "c", label: "15", weight: 15 } },
+  //     { data: { id: "eb", source: "e", target: "b", label: "8", weight: 8 } },
+  //     { data: { id: "ec", source: "e", target: "c", label: "2", weight: 2 } },
+  //     { data: { id: "cd", source: "c", target: "d", label: "5", weight: 5 } },
+  //     { data: { id: "de", source: "d", target: "e", label: "3", weight: 3 } },
+  //     { data: { id: "cb", source: "c", target: "b", label: "6", weight: 6 } },
+  //     { data: { id: "ca", source: "c", target: "a", label: "11", weight: 11 } },
+  //   ],
+  //   []
+  // );
+
   const elements = useMemo(
-    () => [
-      { data: { id: "a", label: "A" }, position: { x: 200, y: 100 } },
-      { data: { id: "b", label: "B" }, position: { x: 300, y: 100 } },
-      { data: { id: "c", label: "C" }, position: { x: 400, y: 200 } },
-      { data: { id: "d", label: "D" }, position: { x: 300, y: 300 } },
-      { data: { id: "e", label: "E" }, position: { x: 200, y: 300 } },
-      { data: { id: "f", label: "F" }, position: { x: 100, y: 200 } },
-      { data: { id: "ab", source: "a", target: "b", label: "1", weight: 1 } },
-      { data: { id: "ba", source: "b", target: "a", label: "4", weight: 4 } },
-      { data: { id: "fa", source: "f", target: "a", label: "16", weight: 16 } },
-      { data: { id: "ae", source: "a", target: "e", label: "10", weight: 10 } },
-      { data: { id: "fe", source: "f", target: "e", label: "19", weight: 19 } },
-      { data: { id: "fc", source: "f", target: "c", label: "15", weight: 15 } },
-      { data: { id: "eb", source: "e", target: "b", label: "8", weight: 8 } },
-      { data: { id: "ec", source: "e", target: "c", label: "2", weight: 2 } },
-      { data: { id: "cd", source: "c", target: "d", label: "5", weight: 5 } },
-      { data: { id: "de", source: "d", target: "e", label: "3", weight: 3 } },
-      { data: { id: "cb", source: "c", target: "b", label: "6", weight: 6 } },
-      { data: { id: "ca", source: "c", target: "a", label: "11", weight: 11 } },
-    ],
+    () => [],
     []
   );
 
@@ -247,6 +252,12 @@ export default function Graph() {
           // Create new node
           // const id = `node-${Date.now()}`;
           const id = labelInput.trim(); // Sử dụng label làm ID (cần đảm bảo không trùng lặp)
+
+          if (cy.$id(id).length > 0) {
+            alert("Node ID already exists. Please choose a different label.");
+            return;
+          }
+
           if (popup.modelPosition) {
             cy.add({
               group: "nodes",
