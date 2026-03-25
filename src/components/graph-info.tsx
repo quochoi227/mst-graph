@@ -1,37 +1,106 @@
 import { useGraphStore } from "../store/useGraphStore";
-import { Plus, Trash2, Save, FolderOpen, MoveRight } from "lucide-react";
+import { Save, FolderOpen, ImageDown } from "lucide-react";
 import { useEffect, useState } from "react";
 // Import các hàm từ Tauri Plugin
 import { save, open } from "@tauri-apps/plugin-dialog";
-import { writeTextFile, readTextFile } from "@tauri-apps/plugin-fs";
+import { writeTextFile, readTextFile, writeFile } from "@tauri-apps/plugin-fs";
 
 interface EdgeInput {
-  id: string;
   source: string;
   target: string;
-  weight: string;
+  weight: number;
 }
+
+interface ParseResult {
+  edges: EdgeInput[];
+  error: string | null;
+}
+
+const parseTextareaContent = (value: string): ParseResult => {
+  if (value === "") {
+    return { edges: [], error: null };
+  }
+
+  const lines = value.split(/\r?\n/);
+  const parsedEdges: EdgeInput[] = [];
+
+  for (let i = 0; i < lines.length; i += 1) {
+    const rawLine = lines[i];
+    const lineNumber = i + 1;
+
+    if (rawLine.trim() === "") {
+      return {
+        edges: [],
+        error: `Dòng ${lineNumber} không được để trống.`
+      };
+    }
+
+    if (rawLine !== rawLine.trim() || /\s{2,}/.test(rawLine) || rawLine.includes("\t")) {
+      return {
+        edges: [],
+        error: `Dòng ${lineNumber} có khoảng trắng không hợp lệ. Chỉ được dùng 1 dấu cách giữa các giá trị.`
+      };
+    }
+
+    const parts = rawLine.split(" ");
+    if (parts.length !== 3) {
+      return {
+        edges: [],
+        error: `Dòng ${lineNumber} phải có dúng 3 giá trị: nguồn đích trọng_số.`
+      };
+    }
+
+    const [source, target, weightText] = parts;
+    const weight = Number(weightText);
+    if (Number.isNaN(weight)) {
+      return {
+        edges: [],
+        error: `Trọng số ở dòng ${lineNumber} phải là số.`
+      };
+    }
+
+    parsedEdges.push({ source, target, weight });
+  }
+
+  return { edges: parsedEdges, error: null };
+};
+
+const toTextareaContent = (edges: EdgeInput[]): string => {
+  return edges.map((edge) => `${edge.source} ${edge.target} ${edge.weight}`).join("\n");
+};
 
 function GraphInfo() {
   const { cy, setSourceNode } = useGraphStore();
-  const [edges, setEdges] = useState<EdgeInput[]>([
-    { id: '1', source: '', target: '', weight: '' }
-  ]);
+  const [graphText, setGraphText] = useState("");
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  const base64ToUint8Array = (base64: string): Uint8Array => {
+    const binaryString = atob(base64);
+    const bytes = new Uint8Array(binaryString.length);
+
+    for (let i = 0; i < binaryString.length; i += 1) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+
+    return bytes;
+  };
 
   useEffect(() => {
     if (cy) {
       const elements = cy.elements().map(ele => {
         if (ele.isEdge()) {
           return {
-            id: ele.id(),
             source: ele.source().data('label'),
             target: ele.target().data('label'),
-            weight: ele.data('weight')?.toString() || ''
+            weight: Number(ele.data('weight') ?? 0)
           };
         }
         return null;
-      }).filter(ele => ele !== null)
-      setEdges(elements as EdgeInput[]);
+      }).filter(ele => ele !== null);
+
+      const parsed = elements as EdgeInput[];
+      setGraphText(toTextareaContent(parsed));
+      setValidationError(null);
     }
   }, [cy]);
 
@@ -42,15 +111,17 @@ function GraphInfo() {
       const elements = cy.elements().map(ele => {
         if (ele.isEdge()) {
           return {
-            id: ele.id(),
             source: ele.source().data('label'),
             target: ele.target().data('label'),
-            weight: ele.data('weight')?.toString() || ''
+            weight: Number(ele.data('weight') ?? 0)
           };
         }
         return null;
-      }).filter(ele => ele !== null)
-      setEdges(elements as EdgeInput[]);
+      }).filter(ele => ele !== null);
+
+      const parsed = elements as EdgeInput[];
+      setGraphText(toTextareaContent(parsed));
+      setValidationError(null);
     };
 
     cy.on('add remove data', 'node, edge', updateEdgesFromGraph);
@@ -59,30 +130,23 @@ function GraphInfo() {
     };
   }, [cy]);
 
-  const addEdgeRow = () => {
-    const newEdge: EdgeInput = {
-      id: Date.now().toString(),
-      source: '',
-      target: '',
-      weight: ''
-    };
-    setEdges([...edges, newEdge]);
-  };
-
-  const removeEdgeRow = (id: string) => {
-    if (edges.length > 1) {
-      setEdges(edges.filter(edge => edge.id !== id));
-    }
-  };
-
-  const handleInputChange = (id: string, field: keyof EdgeInput, value: string) => {
-    setEdges(edges.map(edge => 
-      edge.id === id ? { ...edge, [field]: value } : edge
-    ));
+  const handleTextareaChange = (value: string) => {
+    setGraphText(value);
+    const { error } = parseTextareaContent(value);
+    setValidationError(error);
   };
 
   const handleUpdateGraph = () => {
     if (!cy) return;
+
+    const { edges: parsedEdges, error } = parseTextareaContent(graphText);
+    if (error) {
+      setValidationError(error);
+      alert(error);
+      return;
+    }
+
+    setValidationError(null);
     setSourceNode(null);
 
     // Xóa tất cả các phần tử hiện tại
@@ -90,7 +154,7 @@ function GraphInfo() {
 
     // Tạo set các đỉnh duy nhất từ dữ liệu edges
     const nodeLabels = new Set<string>();
-    edges.forEach(edge => {
+    parsedEdges.forEach(edge => {
       if (edge.source.trim()) nodeLabels.add(edge.source.trim());
       if (edge.target.trim()) nodeLabels.add(edge.target.trim());
     });
@@ -109,7 +173,7 @@ function GraphInfo() {
       cy.add({
         group: 'nodes',
         data: { 
-          id: label.toLowerCase(), 
+          id: label, 
           label: label 
         },
         position: { x, y }
@@ -117,17 +181,16 @@ function GraphInfo() {
     });
 
     // Thêm các cạnh vào đồ thị
-    edges.forEach((edge, index) => {
+    parsedEdges.forEach((edge, index) => {
       if (edge.source.trim() && edge.target.trim()) {
-        const weight = parseFloat(edge.weight) || 0;
         cy.add({
           group: 'edges',
           data: {
             id: `edge-${index}-${Date.now()}`,
-            source: edge.source.trim().toLowerCase(),
-            target: edge.target.trim().toLowerCase(),
-            label: edge.weight || '0',
-            weight: weight
+            source: edge.source.trim(),
+            target: edge.target.trim(),
+            label: String(edge.weight),
+            weight: edge.weight
           }
         });
       }
@@ -165,6 +228,32 @@ function GraphInfo() {
     }
   };
 
+  const handleSaveGraphImage = async () => {
+    if (!cy) return;
+
+    try {
+      const filePath = await save({
+        defaultPath: 'graph.png',
+        filters: [{
+          name: 'PNG',
+          extensions: ['png']
+        }]
+      });
+
+      if (filePath) {
+        const dataUrl = cy.png({ full: true, bg: '#ffffff', scale: 2 });
+        const base64Data = dataUrl.replace(/^data:image\/png;base64,/, '');
+        const imageBytes = base64ToUint8Array(base64Data);
+
+        await writeFile(filePath, imageBytes);
+        alert('Đã lưu ảnh đồ thị thành công!');
+      }
+    } catch (error) {
+      console.error('Lỗi khi lưu ảnh đồ thị:', error);
+      alert('Có lỗi xảy ra khi lưu ảnh đồ thị!');
+    }
+  };
+
   const handleLoadGraph = async () => {
     if (!cy) return;
 
@@ -191,21 +280,16 @@ function GraphInfo() {
 
         // Cập nhật state của bảng từ đồ thị vừa load
         const loadedEdges: EdgeInput[] = [];
-        cy.edges().forEach((edge, index) => {
+        cy.edges().forEach((edge) => {
           loadedEdges.push({
-            id: `${index}-${Date.now()}`,
             source: edge.source().data('label') || '',
             target: edge.target().data('label') || '',
-            weight: edge.data('weight')?.toString() || ''
+            weight: Number(edge.data('weight') ?? 0)
           });
         });
 
-        // Nếu không có cạnh nào, thêm một hàng trống
-        if (loadedEdges.length === 0) {
-          loadedEdges.push({ id: '1', source: '', target: '', weight: '' });
-        }
-
-        setEdges(loadedEdges);
+        setGraphText(toTextareaContent(loadedEdges));
+        setValidationError(null);
 
         // Fit view để hiển thị toàn bộ đồ thị
         cy.fit();
@@ -229,14 +313,21 @@ function GraphInfo() {
         <div className="mt-2 flex gap-2">
           <button
             onClick={handleSaveGraph}
-            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary text-white text-xs rounded hover:bg-primary/90 transition-colors"
+            className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 bg-primary text-white text-xs rounded hover:bg-primary/90 transition-colors"
           >
             <Save size={14} />
             Lưu
           </button>
           <button
+            onClick={handleSaveGraphImage}
+            className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 bg-indigo-500 text-white text-xs rounded hover:bg-indigo-600 transition-colors"
+          >
+            <ImageDown size={14} />
+            Lưu ảnh
+          </button>
+          <button
             onClick={handleLoadGraph}
-            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 bg-secondary text-white text-xs rounded hover:bg-secondary/90 transition-colors"
+            className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 bg-secondary text-white text-xs rounded hover:bg-secondary/90 transition-colors"
           >
             <FolderOpen size={14} />
             Mở
@@ -245,65 +336,29 @@ function GraphInfo() {
       </div>
 
       {/* Edge List */}
-      <div className="flex-1 overflow-auto p-2">
-        <div className="space-y-1">
-          {edges.map((edge) => (
-            <div key={edge.id} className="flex items-center gap-1 bg-white rounded border border-slate-200 p-1">
-              <input
-                type="text"
-                value={edge.source}
-                onChange={(e) => handleInputChange(edge.id, 'source', e.target.value)}
-                placeholder="U"
-                className="w-12 text-xs px-1.5 py-1 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-primary text-center"
-              />
-              <span className="text-slate-400 text-xs">
-                <MoveRight />
-              </span>
-              <input
-                type="text"
-                value={edge.target}
-                onChange={(e) => handleInputChange(edge.id, 'target', e.target.value)}
-                placeholder="V"
-                className="w-12 text-xs px-1.5 py-1 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-primary text-center"
-              />
-              <span className="text-slate-400 text-xs">:</span>
-              <input
-                type="number"
-                value={edge.weight}
-                onChange={(e) => handleInputChange(edge.id, 'weight', e.target.value)}
-                placeholder="W"
-                className="w-20 text-xs px-1.5 py-1 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-primary text-center"
-              />
-              <button
-                onClick={() => removeEdgeRow(edge.id)}
-                disabled={edges.length === 1}
-                className="p-1 text-red-500 hover:bg-red-50 rounded disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                title="Xóa"
-              >
-                <Trash2 size={12} />
-              </button>
-            </div>
-          ))}
-        </div>
+      <div className="flex-1 overflow-auto p-2 space-y-2">
+        <textarea
+          value={graphText}
+          onChange={(e) => handleTextareaChange(e.target.value)}
+          placeholder={"3 2 4\n4 5 6"}
+          className="w-full min-h-52 resize-none text-xs px-2 py-2 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-primary font-mono"
+        />
+        <p className="text-[11px] text-slate-500">
+          Moi dong gom 3 gia tri theo dinh dang: nguon dich trong_so (cach nhau dung 1 dau cach).
+        </p>
+        {validationError && (
+          <p className="text-[11px] text-red-500">{validationError}</p>
+        )}
       </div>
 
       {/* Actions */}
       <div className="p-2 border-t border-slate-200 bg-white">
-        <div className="flex gap-2">
-          <button
-            onClick={addEdgeRow}
-            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded transition-colors"
-          >
-            <Plus size={14} />
-            Thêm
-          </button>
-          <button
-            onClick={handleUpdateGraph}
-            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs rounded transition-colors font-medium"
-          >
-            Cập nhật
-          </button>
-        </div>
+        <button
+          onClick={handleUpdateGraph}
+          className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs rounded transition-colors font-medium"
+        >
+          Cập nhật
+        </button>
       </div>
     </div>
   )
