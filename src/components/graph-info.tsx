@@ -344,7 +344,7 @@ function GraphInfo() {
           className="w-full min-h-52 resize-none text-xs px-2 py-2 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-primary font-mono"
         />
         <p className="text-[11px] text-slate-500">
-          Moi dong gom 3 gia tri theo dinh dang: nguon dich trong_so (cach nhau dung 1 dau cach).
+          Mỗi dòng gồm 3 giá trị: nguồn đích trọng_số.
         </p>
         {validationError && (
           <p className="text-[11px] text-red-500">{validationError}</p>
