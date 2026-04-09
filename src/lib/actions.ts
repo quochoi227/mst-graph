@@ -36,7 +36,7 @@ const dfs = async (node: cytoscape.NodeSingular, color: string, visited: Set<str
     duration: 500,
     easing: "ease-in-out"
   });
-  await delay(800);
+  await delay(500);
   const neighborEdges = node.connectedEdges();
   for (let i = 0; i < neighborEdges.length; i++) {
     const edge = neighborEdges[i];
@@ -80,7 +80,7 @@ export const highlightComponents = async () => {
 export const primMST = async (
   cy: cytoscape.Core | null,
   sourceNode: string,
-  delayMs: number = 1000,
+  delayMs: number = 500,
   isPaused: boolean = false
 ): Promise<void> => {
   if (!cy) return;
@@ -238,7 +238,7 @@ export const primMST = async (
 
 export const kruskalMST = async (
   cy: cytoscape.Core | null,
-  delayMs: number = 1000,
+  delayMs: number = 500,
   isPaused: boolean = false
 ): Promise<void> => {
   if (!cy) return;
