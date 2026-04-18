@@ -39,9 +39,9 @@ export function AppSidebar() {
         setPlaying(false);
         return;
       }
-      primMST(cy, sourceNode.id(), 500);
+      primMST(cy, sourceNode.id(), 800);
     } else if (cy && algorithm === "kruskal") {
-      kruskalMST(cy, 500);
+      kruskalMST(cy, 800);
     }
   };
 

@@ -36,7 +36,7 @@ const dfs = async (node: cytoscape.NodeSingular, color: string, visited: Set<str
     duration: 500,
     easing: "ease-in-out"
   });
-  await delay(500);
+  await delay(600);
   const neighborEdges = node.connectedEdges();
   for (let i = 0; i < neighborEdges.length; i++) {
     const edge = neighborEdges[i];
